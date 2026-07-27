@@ -125,22 +125,6 @@
             render();
         }
 
-        function renderWaitingPage() {
-            return `
-                <div class="bg-white p-8 rounded-3xl shadow-xl border border-amber-100 mt-12 text-center">
-                    <div class="flex justify-center mb-4">
-                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-amber-600 border-t-transparent"></div>
-                    </div>
-                    <h2 class="text-xl font-extrabold text-amber-900 mb-2">Payment Verification</h2>
-                    <p class="text-xs text-amber-700 mb-6 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-200/70">
-                        <i class="fa-regular fa-clock text-amber-600 mr-1"></i> Please wait for approval. <br><b class="text-amber-900 mt-1 inline-block">Wait for approve 15 to 25 min</b>.
-                    </p>
-                    <button onclick="logout()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 p-3.5 rounded-2xl font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout / Exit
-                    </button>
-                </div>
-            `;
-        }
 
         function renderHome() {
             const lastTaskTime = localStorage.getItem(`last_task_time_${currentUser.id}`);
