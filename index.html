@@ -22,6 +22,7 @@
         let currentTab = 'home';
         let authMode = 'login';
         let isWaitingForApproval = false;
+        let showTasksView = false; // Controls task section visibility
 
         const urlParams = new URLSearchParams(window.location.search);
         const refId = urlParams.get('ref');
@@ -117,32 +118,6 @@
             render();
         }
 
-        function renderDepositPage() {
-            return `
-                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 mt-6">
-                    <div class="text-center mb-5">
-                        <div class="inline-flex items-center justify-center w-12 h-12 bg-amber-100 text-amber-700 rounded-full text-xl mb-1 shadow-inner">
-                            <i class="fa-solid fa-wallet"></i>
-                        </div>
-                        <h2 class="text-xl font-extrabold text-amber-900">Deposit via SadaPay</h2>
-                    </div>
-                    <div class="text-xs text-amber-800 mb-4 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-200/70 leading-relaxed">
-                        <p class="mb-1"><i class="fa-solid fa-circle-info text-amber-600 mr-1.5"></i> Fee: <b>520 Rs</b></p>
-                        <p><i class="fa-solid fa-building-columns text-amber-600 mr-1.5"></i> SadaPay Account: <b>0312-3456789</b></p>
-                    </div>
-                    <div class="space-y-3 mb-4">
-                        <input type="text" id="tid" placeholder="Transaction ID" oninput="checkDepositForm()" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        <input type="text" id="holder" placeholder="Account Holder Name" oninput="checkDepositForm()" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        <input type="text" id="sender" placeholder="Sender Account Number" oninput="checkDepositForm()" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <button onclick="submitDeposit()" id="dep-btn" disabled class="w-full bg-gray-300 text-white p-3.5 rounded-2xl font-bold cursor-not-allowed transition shadow-sm">Proceed Payment</button>
-                    <button onclick="logout()" class="w-full mt-3 bg-rose-50 hover:bg-rose-100 text-rose-600 p-3 rounded-2xl font-semibold text-xs transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout / Exit
-                    </button>
-                </div>
-            `;
-        }
-
         function renderWaitingPage() {
             return `
                 <div class="bg-white p-8 rounded-3xl shadow-xl border border-amber-100 mt-12 text-center">
@@ -158,44 +133,6 @@
                     </button>
                 </div>
             `;
-        }
-
-        function checkDepositForm() {
-            const tid = document.getElementById('tid').value;
-            const holder = document.getElementById('holder').value;
-            const sender = document.getElementById('sender').value;
-            const btn = document.getElementById('dep-btn');
-            if(tid && holder && sender) {
-                btn.disabled = false;
-                btn.classList.remove('bg-gray-300', 'cursor-not-allowed', 'shadow-sm');
-                btn.classList.add('bg-amber-600', 'hover:bg-amber-700', 'shadow-lg', 'shadow-amber-600/30');
-            } else {
-                btn.disabled = true;
-                btn.classList.add('bg-gray-300', 'cursor-not-allowed', 'shadow-sm');
-                btn.classList.remove('bg-amber-600', 'hover:bg-amber-700', 'shadow-lg', 'shadow-amber-600/30');
-            }
-        }
-
-        async function submitDeposit() {
-            const tid = document.getElementById('tid').value;
-            const holder = document.getElementById('holder').value;
-            const sender = document.getElementById('sender').value;
-            
-            const { error } = await supabaseClient.from('deposits').insert([{ 
-                user_id: currentUser.id, 
-                transaction_id: tid, 
-                account_holder: holder, 
-                sender_account: sender,
-                amount: 520 
-            }]);
-
-            if(error) {
-                alert('Error: ' + error.message);
-                return;
-            }
-
-            isWaitingForApproval = true;
-            render();
         }
 
         function renderHome() {
@@ -226,21 +163,38 @@
                         </div>
                     </div>
                     
-                    <div class="mt-4 p-4 bg-amber-50/50 rounded-2xl border border-amber-100">
-                        <h3 class="font-bold text-xs text-amber-900 mb-3 flex items-center uppercase tracking-wide">
-                            <i class="fa-solid fa-list-check mr-2 text-amber-600 text-sm"></i>Daily Tasks (Earn $0.025 per task)
-                        </h3>
-                        ${isResting ? `
-                            <div class="bg-orange-50 border border-orange-200 text-orange-900 p-4 rounded-2xl text-center">
-                                <i class="fa-regular fa-clock text-2xl mb-1 text-orange-600"></i>
-                                <p class="font-bold text-xs">Limit Reached! (3/3 Tasks Completed)</p>
-                                <p class="text-[11px] mt-1 text-orange-700">Please rest for 24 hours. New tasks will unlock tomorrow.</p>
-                            </div>
+                    <!-- Task Trigger Button or Tasks View -->
+                    <div class="mt-4">
+                        {!showTasksView ? `
+                            <button onclick="toggleTasksView()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white p-4 rounded-2xl font-bold shadow-lg shadow-amber-600/30 transition flex items-center justify-between">
+                                <span class="flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-list-check text-lg"></i> Daily Earning Tasks
+                                </span>
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
                         ` : `
-                            <div class="space-y-2.5">
-                                ${renderTaskItem(1, 'https://google.com')}
-                                ${renderTaskItem(2, 'https://youtube.com')}
-                                ${renderTaskItem(3, 'https://wikipedia.org')}
+                            <div class="p-4 bg-amber-50/50 rounded-2xl border border-amber-100">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-xs text-amber-900 flex items-center uppercase tracking-wide">
+                                        <i class="fa-solid fa-list-check mr-2 text-amber-600 text-sm"></i>Daily Tasks (Earn $0.025 per task)
+                                    </h3>
+                                    <button onclick="toggleTasksView()" class="text-amber-700 hover:text-amber-900 text-xs font-bold bg-amber-200/50 px-2.5 py-1 rounded-xl">
+                                        <i class="fa-solid fa-xmark mr-1"></i>Close
+                                    </button>
+                                </div>
+                                ${isResting ? `
+                                    <div class="bg-orange-50 border border-orange-200 text-orange-900 p-4 rounded-2xl text-center">
+                                        <i class="fa-regular fa-clock text-2xl mb-1 text-orange-600"></i>
+                                        <p class="font-bold text-xs">Limit Reached! (3/3 Tasks Completed)</p>
+                                        <p class="text-[11px] mt-1 text-orange-700">Please rest for 24 hours. New tasks will unlock tomorrow.</p>
+                                    </div>
+                                ` : `
+                                    <div class="space-y-2.5">
+                                        ${renderTaskItem(1, 'https://google.com')}
+                                        ${renderTaskItem(2, 'https://youtube.com')}
+                                        ${renderTaskItem(3, 'https://wikipedia.org')}
+                                    </div>
+                                `}
                             </div>
                         `}
                     </div>
@@ -256,6 +210,11 @@
                     </div>
                 </div>
             `;
+        }
+
+        function toggleTasksView() {
+            showTasksView = !showTasksView;
+            render();
         }
 
         function renderTaskItem(id, url) {
@@ -422,6 +381,7 @@
 
         function switchTab(tab) {
             currentTab = tab;
+            showTasksView = false; // Reset task view when changing tabs
             render();
         }
 
@@ -474,6 +434,7 @@
             localStorage.removeItem('user');
             currentUser = null;
             isWaitingForApproval = false;
+            showTasksView = false;
             authMode = 'login';
             render();
         }
