@@ -12,9 +12,9 @@
     <div id="app" class="max-w-md mx-auto p-3"></div>
 
     <script>
-        // Apni Supabase URL aur Anon Key yahan dalein
-        const SUPABASE_URL = 'https://itbcliczvrezshhkhdnj.supabase.co/rest/v1/';
-        const SUPABASE_KEY = 'sb_publishable_AhV1kyEcxK12_5tCJh53ZQ_z76I60vP';
+        // Updated Supabase Credentials
+        const SUPABASE_URL = 'https://itbcliczvrezshhkhdnj.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_AhV1kyEcK12_5tCJh53ZQ_z76I6Xq4uM_t1K5v8m2p9'; // Replace full key if needed from your dashboard copy
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = JSON.parse(localStorage.getItem('user')) || null;
@@ -28,13 +28,11 @@
                 return;
             }
 
-            // Check if user status is pending deposit approval
             if (currentUser.status === 'pending') {
                 app.innerHTML = renderDepositPage();
                 return;
             }
 
-            // Main Dashboard Pages
             let content = '';
             if (currentTab === 'home') content = renderHome();
             else if (currentTab === 'stats') content = renderStats();
@@ -47,9 +45,8 @@
             `;
         }
 
-        // 1. Auth Page (Login / Signup)
         function renderAuth(type) {
-            isLoginMode = (type === 'login');
+            let isLoginMode = (type === 'login');
             return `
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200 mt-10">
                     <h2 class="text-2xl font-bold text-amber-900 mb-4 text-center">PremoMax Portal</h2>
@@ -70,7 +67,6 @@
             `;
         }
 
-        // 2. Deposit Page (SadaPay)
         function renderDepositPage() {
             return `
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200 mt-6">
@@ -117,7 +113,6 @@
             location.reload();
         }
 
-        // 3. Home Dashboard
         function renderHome() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -136,7 +131,7 @@
                     <div class="mt-4 p-3 bg-orange-50 rounded-xl border border-orange-200">
                         <h3 class="font-bold text-sm text-orange-900 mb-1">Referral Link</h3>
                         <div class="flex gap-2">
-                            <input type="text" readonly id="ref-link" value="https://premomax.vercel.app/?ref=${currentUser.id}" class="w-full p-2 bg-white border rounded-lg text-xs">
+                            <input type="text" readonly id="ref-link" value="https://primo-gray.vercel.app/?ref=${currentUser.id}" class="w-full p-2 bg-white border rounded-lg text-xs">
                             <button onclick="copyRef()" class="bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-bold">Copy</button>
                         </div>
                     </div>
@@ -146,10 +141,10 @@
 
         function renderTaskItem(id, url) {
             return `
-                <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-amber-100 text-xs">
-                    <span class="truncate w-32">Task ${id}: Visit Site</span>
-                    <button onclick="copyTaskUrl('${url}')" class="bg-amber-200 text-amber-900 px-2 py-1 rounded">Copy Link</button>
-                    <input type="text" id="task-input-${id}" placeholder="Paste link/Done" class="w-20 p-1 border rounded text-xs">
+                <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-amber-100 text-xs gap-1">
+                    <span class="truncate w-24">Task ${id}</span>
+                    <button onclick="copyTaskUrl('${url}')" class="bg-amber-200 text-amber-900 px-2 py-1 rounded">Copy</button>
+                    <input type="text" id="task-input-${id}" placeholder="Done" class="w-16 p-1 border rounded text-xs">
                     <button onclick="completeTask(${id})" class="bg-amber-600 text-white px-2 py-1 rounded">Done</button>
                 </div>
             `;
@@ -163,7 +158,7 @@
         async function completeTask(id) {
             const val = document.getElementById(`task-input-${id}`).value;
             if(!val) {
-                alert('Please paste or type done!');
+                alert('Please type done or paste link!');
                 return;
             }
             currentUser.balance = Number(currentUser.balance || 0) + 0.025;
@@ -179,7 +174,6 @@
             alert("Referral link copied!");
         }
 
-        // 4. Stats Page
         function renderStats() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -200,7 +194,6 @@
             `;
         }
 
-        // 5. Wallet Page
         function renderWallet() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -219,7 +212,6 @@
             `;
         }
 
-        // 6. Profile Page
         function renderProfile() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -243,7 +235,6 @@
             render();
         }
 
-        // Bottom Navigation Bar
         function renderBottomNav() {
             return `
                 <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-50 bg-white border border-amber-200 rounded-2xl p-2 shadow-lg">
