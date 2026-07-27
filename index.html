@@ -19,6 +19,7 @@
 
         let currentUser = JSON.parse(localStorage.getItem('user')) || null;
         let currentTab = 'home';
+        let authMode = 'login'; // Track login or signup view
 
         // Check URL for referral parameter
         const urlParams = new URLSearchParams(window.location.search);
@@ -31,7 +32,7 @@
             const app = document.getElementById('app');
             
             if (!currentUser) {
-                app.innerHTML = renderAuth('login');
+                app.innerHTML = renderAuth();
                 return;
             }
 
@@ -58,8 +59,8 @@
             `;
         }
 
-        function renderAuth(type) {
-            let isLoginMode = (type === 'login');
+        function renderAuth() {
+            let isLoginMode = (authMode === 'login');
             return `
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200 mt-10">
                     <h2 class="text-2xl font-bold text-amber-900 mb-4 text-center">PremoMax Portal</h2>
@@ -79,9 +80,9 @@
             `;
         }
 
-        function switchAuthMode(type) {
-            const app = document.getElementById('app');
-            app.innerHTML = renderAuth(type);
+        function switchAuthMode(mode) {
+            authMode = mode;
+            render();
         }
 
         function renderDepositPage() {
@@ -320,7 +321,7 @@
                 alert('Invalid email or password');
             } else {
                 currentUser = data;
-                localStorage.setItem('user', JSON.stringify(data));
+                localStorage.setItem('user', JSON.stringify(currentUser));
                 render();
             }
         }
@@ -328,6 +329,7 @@
         function logout() {
             localStorage.removeItem('user');
             currentUser = null;
+            authMode = 'login';
             render();
         }
 
