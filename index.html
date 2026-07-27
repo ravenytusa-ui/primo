@@ -6,6 +6,7 @@
     <title>PremoMax - Earning Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-amber-50/30 min-h-screen pb-24">
 
@@ -62,18 +63,41 @@
         function renderAuth() {
             let isLoginMode = (authMode === 'login');
             return `
-                <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200 mt-10">
-                    <h2 class="text-2xl font-bold text-amber-900 mb-4 text-center">PremoMax Portal</h2>
-                    ${!isLoginMode ? `<input type="text" id="name" placeholder="Full Name" class="w-full p-3 mb-3 border rounded-xl">` : ''}
-                    <input type="email" id="email" placeholder="Email" class="w-full p-3 mb-3 border rounded-xl">
-                    <input type="password" id="password" placeholder="Password" class="w-full p-3 mb-3 border rounded-xl">
+                <div class="bg-white p-6 rounded-2xl shadow-xl border border-amber-200 mt-10">
+                    <div class="text-center mb-6">
+                        <div class="inline-block p-3 bg-amber-100 text-amber-700 rounded-full text-3xl mb-2">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-amber-900">PremoMax Portal</h2>
+                        <p class="text-xs text-amber-600">Earning & Investment Platform</p>
+                    </div>
                     ${!isLoginMode ? `
-                        <input type="password" id="retypepassword" placeholder="Retype Password" class="w-full p-3 mb-3 border rounded-xl">
-                        <input type="text" id="phone" placeholder="Phone Number" class="w-full p-3 mb-3 border rounded-xl">
-                        <button onclick="handleSignup()" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold mb-3">Sign Up</button>
+                        <div class="relative mb-3">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-500"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" id="name" placeholder="Full Name" class="w-full pl-10 p-3 border rounded-xl text-sm focus:outline-amber-600">
+                        </div>
+                    ` : ''}
+                    <div class="relative mb-3">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-500"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="email" placeholder="Email Address" class="w-full pl-10 p-3 border rounded-xl text-sm focus:outline-amber-600">
+                    </div>
+                    <div class="relative mb-3">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="password" placeholder="Password" class="w-full pl-10 p-3 border rounded-xl text-sm focus:outline-amber-600">
+                    </div>
+                    ${!isLoginMode ? `
+                        <div class="relative mb-3">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-500"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" id="retypepassword" placeholder="Retype Password" class="w-full pl-10 p-3 border rounded-xl text-sm focus:outline-amber-600">
+                        </div>
+                        <div class="relative mb-3">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-500"><i class="fa-solid fa-phone"></i></span>
+                            <input type="text" id="phone" placeholder="Phone Number" class="w-full pl-10 p-3 border rounded-xl text-sm focus:outline-amber-600">
+                        </div>
+                        <button onclick="handleSignup()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-xl font-bold mb-3 shadow-md transition"><i class="fa-solid fa-user-plus mr-2"></i>Sign Up</button>
                         <p onclick="switchAuthMode('login')" class="text-center text-sm text-amber-700 cursor-pointer mt-2 underline font-semibold">Already have an account? Login</p>
                     ` : `
-                        <button onclick="handleLogin()" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold mb-3">Login</button>
+                        <button onclick="handleLogin()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-xl font-bold mb-3 shadow-md transition"><i class="fa-solid fa-right-to-bracket mr-2"></i>Login</button>
                         <p onclick="switchAuthMode('signup')" class="text-center text-sm text-amber-700 cursor-pointer mt-2 underline font-semibold">Don't have an account? Sign Up</p>
                     `}
                 </div>
@@ -87,27 +111,39 @@
 
         function renderDepositPage() {
             return `
-                <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200 mt-6">
-                    <h2 class="text-xl font-bold text-amber-900 mb-2">Deposit via SadaPay</h2>
-                    <p class="text-sm text-amber-700 mb-4 bg-amber-50 p-3 rounded-xl border border-amber-200">Fee: 520 Rs<br>Send payment to SadaPay Account: 0312-3456789</p>
-                    <input type="text" id="tid" placeholder="Transaction ID" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
-                    <input type="text" id="holder" placeholder="Account Holder Name" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
-                    <input type="text" id="sender" placeholder="Sender Account Number" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
-                    <button onclick="submitDeposit()" id="dep-btn" disabled class="w-full bg-gray-300 text-white p-3 rounded-xl font-bold cursor-not-allowed">Proceed Payment</button>
-                    <button onclick="logout()" class="w-full mt-3 bg-rose-100 text-rose-600 p-2 rounded-semibold">Logout / Exit</button>
+                <div class="bg-white p-6 rounded-2xl shadow-xl border border-amber-200 mt-6">
+                    <div class="text-center mb-4">
+                        <div class="inline-block p-3 bg-amber-100 text-amber-700 rounded-full text-2xl mb-1">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-amber-900">Deposit via SadaPay</h2>
+                    </div>
+                    <p class="text-sm text-amber-800 mb-4 bg-amber-50 p-3 rounded-xl border border-amber-200 leading-relaxed">
+                        <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i> Fee: <b>520 Rs</b><br>
+                        <i class="fa-solid fa-building-columns text-amber-600 mr-1"></i> SadaPay Account: <b>0312-3456789</b>
+                    </p>
+                    <div class="space-y-3 mb-4">
+                        <input type="text" id="tid" placeholder="Transaction ID" oninput="checkDepositForm()" class="w-full p-3 border rounded-xl text-sm">
+                        <input type="text" id="holder" placeholder="Account Holder Name" oninput="checkDepositForm()" class="w-full p-3 border rounded-xl text-sm">
+                        <input type="text" id="sender" placeholder="Sender Account Number" oninput="checkDepositForm()" class="w-full p-3 border rounded-xl text-sm">
+                    </div>
+                    <button onclick="submitDeposit()" id="dep-btn" disabled class="w-full bg-gray-300 text-white p-3 rounded-xl font-bold cursor-not-allowed transition">Proceed Payment</button>
+                    <button onclick="logout()" class="w-full mt-3 bg-rose-50 text-rose-600 p-2.5 rounded-xl font-semibold text-sm"><i class="fa-solid fa-arrow-right-from-bracket mr-1"></i>Logout / Exit</button>
                 </div>
             `;
         }
 
         function renderWaitingPage() {
             return `
-                <div class="bg-white p-8 rounded-2xl shadow-md border border-amber-200 mt-12 text-center">
+                <div class="bg-white p-8 rounded-2xl shadow-xl border border-amber-200 mt-12 text-center">
                     <div class="flex justify-center mb-4">
                         <div class="animate-spin rounded-full h-12 w-12 border-4 border-amber-600 border-t-transparent"></div>
                     </div>
                     <h2 class="text-xl font-bold text-amber-900 mb-2">Payment Verification</h2>
-                    <p class="text-sm text-amber-700 mb-6 bg-amber-50 p-3 rounded-xl border border-amber-200">Please wait for approval. <b>Wait for approve 15 to 25 min</b>.</p>
-                    <button onclick="logout()" class="w-full bg-rose-100 text-rose-600 p-3 rounded-xl font-semibold">Logout / Exit</button>
+                    <p class="text-sm text-amber-700 mb-6 bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        <i class="fa-regular fa-clock text-amber-600 mr-1"></i> Please wait for approval. <br><b>Wait for approve 15 to 25 min</b>.
+                    </p>
+                    <button onclick="logout()" class="w-full bg-rose-50 text-rose-600 p-3 rounded-xl font-semibold"><i class="fa-solid fa-arrow-right-from-bracket mr-1"></i>Logout / Exit</button>
                 </div>
             `;
         }
@@ -120,11 +156,11 @@
             if(tid && holder && sender) {
                 btn.disabled = false;
                 btn.classList.remove('bg-gray-300', 'cursor-not-allowed');
-                btn.classList.add('bg-amber-600');
+                btn.classList.add('bg-amber-600', 'hover:bg-amber-700');
             } else {
                 btn.disabled = true;
                 btn.classList.add('bg-gray-300', 'cursor-not-allowed');
-                btn.classList.remove('bg-amber-600');
+                btn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
             }
         }
 
@@ -151,38 +187,73 @@
         }
 
         function renderHome() {
+            // Check if 24 hours have passed since last task completion
+            const lastTaskTime = localStorage.getItem(`last_task_time_${currentUser.id}`);
+            let tasksCompletedToday = Number(localStorage.getItem(`tasks_count_${currentUser.id}`) || 0);
+            let isResting = false;
+
+            if (lastTaskTime) {
+                const hoursPassed = (new Date().getTime() - Number(lastTaskTime)) / (1000 * 60 * 60);
+                if (hoursPassed >= 24) {
+                    tasksCompletedToday = 0;
+                    localStorage.setItem(`tasks_count_${currentUser.id}`, 0);
+                    localStorage.removeItem(`last_task_time_${currentUser.id}`);
+                } else if (tasksCompletedToday >= 3) {
+                    isResting = true;
+                }
+            }
+
             return `
-                <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
-                    <h2 class="text-3xl font-bold text-amber-900">$${Number(currentUser.balance || 0).toFixed(3)}</h2>
-                    <p class="text-xs text-amber-600 uppercase font-semibold">Available Balance</p>
-                    
-                    <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                        <h3 class="font-bold text-sm text-amber-900 mb-2">Daily Tasks (Earn $0.025 per task)</h3>
-                        <div class="space-y-2">
-                            ${renderTaskItem(1, 'https://google.com')}
-                            ${renderTaskItem(2, 'https://youtube.com')}
-                            ${renderTaskItem(3, 'https://wikipedia.org')}
+                <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-xl mb-20">
+                    <div class="flex items-center justify-between mb-4 bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        <div>
+                            <h2 class="text-2xl font-bold text-amber-900">$${Number(currentUser.balance || 0).toFixed(3)}</h2>
+                            <p class="text-xs text-amber-600 uppercase font-semibold"><i class="fa-solid fa-wallet mr-1"></i>Available Balance</p>
                         </div>
+                        <div class="bg-amber-600 text-white p-3 rounded-xl shadow">
+                            <i class="fa-solid fa-chart-line text-lg"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-amber-50/70 rounded-xl border border-amber-200">
+                        <h3 class="font-bold text-sm text-amber-900 mb-2 flex items-center">
+                            <i class="fa-solid fa-list-check mr-2 text-amber-600"></i>Daily Tasks (Earn $0.025 per task)
+                        </h3>
+                        ${isResting ? `
+                            <div class="bg-orange-100 border border-orange-300 text-orange-900 p-4 rounded-xl text-center">
+                                <i class="fa-regular fa-clock text-2xl mb-1 text-orange-600"></i>
+                                <p class="font-bold text-sm">Limit Reached! (3/3 Tasks Completed)</p>
+                                <p class="text-xs mt-1">Please rest for 24 hours. New tasks will unlock tomorrow.</p>
+                            </div>
+                        ` : `
+                            <div class="space-y-2">
+                                ${renderTaskItem(1, 'https://google.com', tasksCompletedToday)}
+                                ${renderTaskItem(2, 'https://youtube.com', tasksCompletedToday)}
+                                ${renderTaskItem(3, 'https://wikipedia.org', tasksCompletedToday)}
+                            </div>
+                        `}
                     </div>
 
                     <div class="mt-4 p-3 bg-orange-50 rounded-xl border border-orange-200">
-                        <h3 class="font-bold text-sm text-orange-900 mb-1">Referral Link</h3>
-                        <div class="flex gap-2">
+                        <h3 class="font-bold text-sm text-orange-900 mb-1 flex items-center">
+                            <i class="fa-solid fa-share-nodes mr-2 text-orange-600"></i>Referral Link
+                        </h3>
+                        <div class="flex gap-2 mt-2">
                             <input type="text" readonly id="ref-link" value="https://primo-gray.vercel.app/?ref=${currentUser.id}" class="w-full p-2 bg-white border rounded-lg text-xs">
-                            <button onclick="copyRef()" class="bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-bold">Copy</button>
+                            <button onclick="copyRef()" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition"><i class="fa-solid fa-copy"></i></button>
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        function renderTaskItem(id, url) {
+        function renderTaskItem(id, url, completedCount) {
             return `
-                <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-amber-100 text-xs gap-1">
-                    <span class="truncate w-20">Task ${id}</span>
-                    <button onclick="copyTaskUrl('${url}')" class="bg-amber-200 text-amber-900 px-2 py-1 rounded font-semibold">Copy</button>
-                    <input type="text" id="task-input-${id}" placeholder="Type done" class="w-20 p-1 border rounded text-xs">
-                    <button onclick="completeTask(${id})" class="bg-amber-600 text-white px-2 py-1 rounded font-semibold">Done</button>
+                <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-amber-100 text-xs gap-1 shadow-sm">
+                    <span class="font-semibold text-amber-900"><i class="fa-solid fa-circle-dot text-amber-500 mr-1"></i>Task ${id}</span>
+                    <button onclick="copyTaskUrl('${url}')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1.5 rounded-lg font-semibold transition"><i class="fa-solid fa-copy mr-1"></i>Copy</button>
+                    <input type="text" id="task-input-${id}" placeholder="Type done" class="w-20 p-1.5 border rounded-lg text-xs focus:outline-amber-600">
+                    <button onclick="completeTask(${id})" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg font-semibold transition"><i class="fa-solid fa-check mr-1"></i>Done</button>
                 </div>
             `;
         }
@@ -198,6 +269,20 @@
                 alert('Please type done or paste link!');
                 return;
             }
+
+            let tasksCompletedToday = Number(localStorage.getItem(`tasks_count_${currentUser.id}`) || 0);
+            if (tasksCompletedToday >= 3) {
+                alert('You have already completed 3 tasks for today! Rest for 24 hours.');
+                render();
+                return;
+            }
+
+            tasksCompletedToday += 1;
+            localStorage.setItem(`tasks_count_${currentUser.id}`, tasksCompletedToday);
+            if (tasksCompletedToday === 1) {
+                localStorage.setItem(`last_task_time_${currentUser.id}`, new Date().getTime());
+            }
+
             currentUser.balance = Number(currentUser.balance || 0) + 0.025;
             await supabaseClient.from('users').update({ balance: currentUser.balance }).eq('id', currentUser.id);
             localStorage.setItem('user', JSON.stringify(currentUser));
@@ -216,24 +301,27 @@
             const count = teamMembers ? teamMembers.length : 0;
             
             let membersListHtml = teamMembers && teamMembers.length > 0 ? 
-                teamMembers.map(m => `<p class="text-xs text-amber-800 bg-white p-2 rounded border border-amber-100 mb-1">👤 ${m.name} (${m.email})</p>`).join('') :
-                `<p class="text-xs text-amber-700">No members added yet.</p>`;
+                teamMembers.map(m => `<p class="text-xs text-amber-800 bg-white p-2.5 rounded-xl border border-amber-100 mb-1"><i class="fa-solid fa-user-check text-amber-600 mr-2"></i>${m.name} (${m.email})</p>`).join('') :
+                `<p class="text-xs text-amber-700 italic">No members added yet.</p>`;
 
             return `
-                <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
-                    <h2 class="text-xl font-bold text-amber-900 mb-3">Team & Statistics</h2>
-                    <p class="text-sm text-amber-700 mb-3">Total Members Added: <span class="font-bold">${count}</span></p>
-                    <div class="mb-4">${membersListHtml}</div>
+                <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-xl mb-20">
+                    <h2 class="text-xl font-bold text-amber-900 mb-3 flex items-center"><i class="fa-solid fa-users text-amber-600 mr-2"></i>Team & Statistics</h2>
+                    <p class="text-sm text-amber-700 mb-3 bg-amber-50 p-3 rounded-xl border border-amber-200">Total Members Added: <span class="font-bold text-amber-900">${count}</span></p>
+                    <div class="mb-4 max-h-40 overflow-y-auto">${membersListHtml}</div>
                     
-                    <div class="space-y-3">
-                        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
-                            <p class="text-xs font-bold text-amber-900">Add 5 members for $21.5 bonus</p>
+                    <div class="space-y-2">
+                        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-center text-xs">
+                            <i class="fa-solid fa-gift text-amber-600 text-lg mr-3"></i>
+                            <span class="font-bold text-amber-900">Add 5 members for $21.5 bonus</span>
                         </div>
-                        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
-                            <p class="text-xs font-bold text-amber-900">Add 10 members for $5 bonus</p>
+                        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-center text-xs">
+                            <i class="fa-solid fa-award text-amber-600 text-lg mr-3"></i>
+                            <span class="font-bold text-amber-900">Add 10 members for $5 bonus</span>
                         </div>
-                        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
-                            <p class="text-xs font-bold text-amber-900">Add 50 members for weekly salary</p>
+                        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-center text-xs">
+                            <i class="fa-solid fa-sack-dollar text-amber-600 text-lg mr-3"></i>
+                            <span class="font-bold text-amber-900">Add 50 members for weekly salary</span>
                         </div>
                     </div>
                 </div>
@@ -242,30 +330,34 @@
 
         function renderWallet() {
             return `
-                <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
-                    <h2 class="text-xl font-bold text-amber-900 mb-3">Withdrawal Wallet</h2>
-                    <p class="text-sm text-amber-700 mb-3">Balance: $${Number(currentUser.balance || 0).toFixed(3)}</p>
-                    <select id="withdraw-method" class="w-full p-3 mb-3 border rounded-xl">
-                        <option>SadaPay</option>
-                        <option>EasyPaisa</option>
-                        <option>JazzCash</option>
-                        <option>U Paisa</option>
-                    </select>
-                    <input type="text" id="acc-num" placeholder="Account Number" class="w-full p-3 mb-3 border rounded-xl">
-                    <input type="text" id="acc-name" placeholder="Account Holder Name" class="w-full p-3 mb-3 border rounded-xl">
-                    <button onclick="alert('Withdrawal request submitted successfully!')" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold">Withdraw</button>
+                <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-xl mb-20">
+                    <h2 class="text-xl font-bold text-amber-900 mb-3 flex items-center"><i class="fa-solid fa-wallet text-amber-600 mr-2"></i>Withdrawal Wallet</h2>
+                    <p class="text-sm text-amber-700 mb-3 bg-amber-50 p-3 rounded-xl border border-amber-200">Balance: <span class="font-bold text-amber-900">$${Number(currentUser.balance || 0).toFixed(3)}</span></p>
+                    <div class="space-y-3 mb-4">
+                        <select id="withdraw-method" class="w-full p-3 border rounded-xl text-sm bg-white">
+                            <option>SadaPay</option>
+                            <option>EasyPaisa</option>
+                            <option>JazzCash</option>
+                            <option>U Paisa</option>
+                        </select>
+                        <input type="text" id="acc-num" placeholder="Account Number" class="w-full p-3 border rounded-xl text-sm">
+                        <input type="text" id="acc-name" placeholder="Account Holder Name" class="w-full p-3 border rounded-xl text-sm">
+                    </div>
+                    <button onclick="alert('Withdrawal request submitted successfully!')" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-xl font-bold transition shadow"><i class="fa-solid fa-money-bill-transfer mr-2"></i>Withdraw</button>
                 </div>
             `;
         }
 
         function renderProfile() {
             return `
-                <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
-                    <h2 class="text-xl font-bold text-amber-900 mb-3">Profile Settings</h2>
-                    <input type="text" id="update-name" value="${currentUser.name}" class="w-full p-3 mb-3 border rounded-xl">
-                    <input type="text" id="update-phone" value="${currentUser.phone || ''}" class="w-full p-3 mb-3 border rounded-xl">
-                    <button onclick="updateProfile()" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold mb-3">Update Profile</button>
-                    <button onclick="logout()" class="w-full bg-rose-100 text-rose-600 p-3 rounded-xl font-bold">Exit / Logout</button>
+                <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-xl mb-20">
+                    <h2 class="text-xl font-bold text-amber-900 mb-3 flex items-center"><i class="fa-solid fa-user-gear text-amber-600 mr-2"></i>Profile Settings</h2>
+                    <div class="space-y-3 mb-4">
+                        <input type="text" id="update-name" value="${currentUser.name}" class="w-full p-3 border rounded-xl text-sm">
+                        <input type="text" id="update-phone" value="${currentUser.phone || ''}" class="w-full p-3 border rounded-xl text-sm">
+                    </div>
+                    <button onclick="updateProfile()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-xl font-bold mb-3 transition shadow"><i class="fa-solid fa-floppy-disk mr-2"></i>Update Profile</button>
+                    <button onclick="logout()" class="w-full bg-rose-50 text-rose-600 p-3 rounded-xl font-bold transition"><i class="fa-solid fa-arrow-right-from-bracket mr-2"></i>Exit / Logout</button>
                 </div>
             `;
         }
@@ -283,13 +375,13 @@
 
         function renderBottomNav() {
             return `
-                <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-50 bg-white border border-amber-200 rounded-2xl p-2 shadow-lg">
+                <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-50 bg-white border border-amber-200 rounded-2xl p-2.5 shadow-2xl">
                     <div class="flex justify-around items-center">
-                        <button onclick="switchTab('home')" class="flex flex-col items-center ${currentTab==='home'?'text-amber-600 font-bold':'text-amber-700/50'} text-xs">Home</button>
-                        <button onclick="switchTab('stats')" class="flex flex-col items-center ${currentTab==='stats'?'text-amber-600 font-bold':'text-amber-700/50'} text-xs">Stats</button>
-                        <button onclick="switchTab('wallet')" class="flex flex-col items-center ${currentTab==='wallet'?'text-amber-600 font-bold':'text-amber-700/50'} text-xs">Wallet</button>
-                        <button onclick="switchTab('profile')" class="flex flex-col items-center ${currentTab==='profile'?'text-amber-600 font-bold':'text-amber-700/50'} text-xs">Profile</button>
-                        <button onclick="logout()" class="flex flex-col items-center text-rose-500 text-xs font-semibold">Exit</button>
+                        <button onclick="switchTab('home')" class="flex flex-col items-center ${currentTab==='home'?'text-amber-600 font-bold scale-105':'text-amber-700/60'} text-xs transition"><i class="fa-solid fa-house text-base mb-0.5"></i>Home</button>
+                        <button onclick="switchTab('stats')" class="flex flex-col items-center ${currentTab==='stats'?'text-amber-600 font-bold scale-105':'text-amber-700/60'} text-xs transition"><i class="fa-solid fa-chart-pie text-base mb-0.5"></i>Stats</button>
+                        <button onclick="switchTab('wallet')" class="flex flex-col items-center ${currentTab==='wallet'?'text-amber-600 font-bold scale-105':'text-amber-700/60'} text-xs transition"><i class="fa-solid fa-wallet text-base mb-0.5"></i>Wallet</button>
+                        <button onclick="switchTab('profile')" class="flex flex-col items-center ${currentTab==='profile'?'text-amber-600 font-bold scale-105':'text-amber-700/60'} text-xs transition"><i class="fa-solid fa-user text-base mb-0.5"></i>Profile</button>
+                        <button onclick="logout()" class="flex flex-col items-center text-rose-500 text-xs font-semibold hover:scale-105 transition"><i class="fa-solid fa-power-off text-base mb-0.5"></i>Exit</button>
                     </div>
                 </div>
             `;
