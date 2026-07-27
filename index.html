@@ -40,20 +40,8 @@
     </div>
 
     <script>
-        // Dummy Cache Data for demonstration
-        let teamMembersCache = [
-            { name: "111", phone: "111", status: "Active" },
-            { name: "wewe", phone: "wewe", status: "Active" }
-        ];
-        let withdrawalsCache = [];
-
-        function copyRef() {
-            const copyText = document.getElementById("ref-link");
-            if(copyText) {
-                navigator.clipboard.writeText(copyText.value);
-                alert("Referral link copied!");
-            }
-        }
+        // Team Members Data (0 for empty state testing as in your screenshot)
+        let teamMembersCache = [];
 
         function renderStats() {
             const count = teamMembersCache.length;
@@ -100,7 +88,7 @@
                         </div>
                     </div>
 
-                    <!-- Quick Stats Grid (2 Columns - Commission removed) -->
+                    <!-- Quick Stats Grid (2 Columns) -->
                     <div class="grid grid-cols-2 gap-3">
                         <div class="bg-white/90 backdrop-blur-xl p-4 rounded-2xl border border-amber-100/80 shadow-lg shadow-amber-500/5 text-center">
                             <div class="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold">
@@ -207,7 +195,6 @@
             }
         }
 
-        // Default load stats view
         window.onload = () => {
             switchTab('stats');
         };
