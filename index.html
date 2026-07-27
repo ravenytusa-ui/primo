@@ -27,9 +27,9 @@
         let withdrawalsCache = [];
 
         const urlParams = new URLSearchParams(window.location.search);
-        const refId = urlParams.get('ref');
-        if(refId && !currentUser) {
-            localStorage.setItem('refId', refId);
+        const refCodeParam = urlParams.get('ref');
+        if(refCodeParam && !currentUser) {
+            localStorage.setItem('refCode', refCodeParam);
         }
 
         async function render() {
@@ -52,7 +52,7 @@
             }
 
             if (currentTab === 'stats') {
-                const { data } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.id);
+                const { data } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.ref_code);
                 teamMembersCache = data || [];
             } else if (currentTab === 'wallet') {
                 const { data } = await supabaseClient.from('withdrawals').select('*').eq('user_id', currentUser.id).order('id', { ascending: false });
@@ -353,7 +353,7 @@
                         </h3>
                         <p class="text-[11px] text-amber-700 mb-3">Share your link with friends and earn exciting referral rewards when they join.</p>
                         <div class="flex gap-2">
-                            <input type="text" readonly id="ref-link" value="https://primo-max.vercel.app/?ref=${currentUser.id}" class="w-full p-3 bg-amber-50/40 border border-amber-200 rounded-2xl text-xs text-gray-600 font-mono">
+                            <input type="text" readonly id="ref-link" value="https://primo-max.vercel.app/?ref=${currentUser.ref_code || currentUser.id}" class="w-full p-3 bg-amber-50/40 border border-amber-200 rounded-2xl text-xs text-gray-600 font-mono">
                             <button onclick="copyRef()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 rounded-2xl text-xs font-bold transition shadow-md shrink-0"><i class="fa-solid fa-copy mr-1"></i> Copy</button>
                         </div>
                     </div>
@@ -799,7 +799,7 @@
             const password = document.getElementById('password').value;
             const retype = document.getElementById('retypepassword').value;
             const phone = document.getElementById('phone').value;
-            const referredBy = localStorage.getItem('refId') || null;
+            const referredBy = localStorage.getItem('refCode') || null;
             
             if(!name || !email || !password || !phone) {
                 alert('Please fill all fields');
@@ -810,8 +810,11 @@
                 return;
             }
 
+            // Generate a random 5-digit ref code (e.g., 48291)
+            const randomRefCode = Math.floor(10000 + Math.random() * 90000).toString();
+
             const { data, error } = await supabaseClient.from('users').insert([{
-                name, email, password, phone, status: 'pending', balance: 0.00, referred_by: referredBy ? Number(referredBy) : null
+                name, email, password, phone, status: 'pending', balance: 0.00, ref_code: randomRefCode, referred_by: referredBy
             }]).select().single();
 
             if(error) {
@@ -819,7 +822,7 @@
             } else {
                 currentUser = data;
                 localStorage.setItem('user', JSON.stringify(data));
-                localStorage.removeItem('refId');
+                localStorage.removeItem('refCode');
                 isWaitingForApproval = false;
                 render();
             }
