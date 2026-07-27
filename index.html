@@ -40,8 +40,12 @@
     </div>
 
     <script>
-        // Team Members Data (0 for empty state testing as in your screenshot)
-        let teamMembersCache = [];
+        // Team Members Data Cache matching your current active members
+        let teamMembersCache = [
+            { name: "111", phone: "111", status: "Active" },
+            { name: "wewe", phone: "wewe", status: "Active" },
+            { name: "Raven", phone: "ravenytusa@gmail.com", status: "Active" }
+        ];
 
         function renderStats() {
             const count = teamMembersCache.length;
@@ -110,7 +114,7 @@
                     <!-- Milestone Goals / Rewards Section -->
                     <div class="space-y-3">
                         
-                        <!-- Goal 1 -->
+                        <!-- Goal 1 (Updated to 3 dollar) -->
                         <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
                             <div class="flex items-center gap-3.5">
                                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 flex items-center justify-center font-bold text-base shadow-inner">
@@ -129,7 +133,7 @@
                             <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-200/50">Reward</span>
                         </div>
 
-                        <!-- Goal 2 -->
+                        <!-- Goal 2 (Updated to 7 dollar) -->
                         <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
                             <div class="flex items-center gap-3.5">
                                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 flex items-center justify-center font-bold text-base shadow-inner">
