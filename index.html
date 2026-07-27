@@ -241,31 +241,33 @@
 
             return `
                 <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl mb-24">
-                    <div class="flex items-center justify-between mb-4 bg-gradient-to-r from-amber-500 to-amber-600 p-4 rounded-2xl text-white shadow-lg shadow-amber-600/20">
+                    <!-- Balance Card -->
+                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-5 rounded-2xl text-white shadow-lg shadow-amber-600/20 flex items-center justify-between mb-4">
                         <div>
                             <h2 class="text-3xl font-black">$${Number(currentUser.balance || 0).toFixed(3)}</h2>
-                            <p class="text-[11px] text-amber-100 uppercase font-bold tracking-wider mt-0.5"><i class="fa-solid fa-wallet mr-1"></i>Available Balance</p>
+                            <p class="text-[11px] text-amber-100 uppercase font-extrabold tracking-wider mt-0.5"><i class="fa-solid fa-wallet mr-1.5"></i>Available Balance</p>
                         </div>
                         <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-sm">
                             <i class="fa-solid fa-chart-line text-xl"></i>
                         </div>
                     </div>
                     
-                    <div class="mt-4">
+                    <!-- Daily Earning Tasks Button / Dropdown -->
+                    <div class="mb-4">
                         ${!showTasksView ? `
-                            <button onclick="toggleTasksView()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white p-4 rounded-2xl font-bold shadow-lg shadow-amber-600/30 transition flex items-center justify-between">
-                                <span class="flex items-center gap-2 text-sm">
-                                    <i class="fa-solid fa-list-check text-lg"></i> Daily Earning Tasks
+                            <button onclick="toggleTasksView()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white p-4 rounded-2xl font-bold shadow-md transition flex items-center justify-between">
+                                <span class="flex items-center gap-2.5 text-xs uppercase tracking-wider font-extrabold">
+                                    <i class="fa-solid fa-list-check text-base"></i> Daily Earning Tasks
                                 </span>
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
                         ` : `
-                            <div class="p-4 bg-amber-50/50 rounded-2xl border border-amber-100">
+                            <div class="p-4 bg-amber-50/50 rounded-2xl border border-amber-200/80">
                                 <div class="flex items-center justify-between mb-3">
-                                    <h3 class="font-bold text-xs text-amber-900 flex items-center uppercase tracking-wide">
-                                        <i class="fa-solid fa-list-check mr-2 text-amber-600 text-sm"></i>Daily Tasks (Earn $0.025 per task)
+                                    <h3 class="font-extrabold text-xs text-amber-900 flex items-center uppercase tracking-wide">
+                                        <i class="fa-solid fa-list-check mr-2 text-amber-600 text-sm"></i>Daily Tasks (Earn $0.025)
                                     </h3>
-                                    <button onclick="toggleTasksView()" class="text-amber-700 hover:text-amber-900 text-xs font-bold bg-amber-200/50 px-2.5 py-1 rounded-xl">
+                                    <button onclick="toggleTasksView()" class="text-amber-800 hover:text-amber-900 text-xs font-bold bg-amber-200/60 px-2.5 py-1 rounded-xl">
                                         <i class="fa-solid fa-xmark mr-1"></i>Close
                                     </button>
                                 </div>
@@ -286,13 +288,14 @@
                         `}
                     </div>
 
-                    <div class="mt-4 p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
-                        <h3 class="font-bold text-xs text-orange-900 mb-2 flex items-center uppercase tracking-wide">
-                            <i class="fa-solid fa-share-nodes mr-2 text-orange-600 text-sm"></i>Referral Link
+                    <!-- Referral Link Section -->
+                    <div class="p-4 bg-amber-50/40 rounded-2xl border border-amber-200/70">
+                        <h3 class="font-extrabold text-xs text-amber-900 mb-2 flex items-center uppercase tracking-wider">
+                            <i class="fa-solid fa-share-nodes mr-2 text-amber-600 text-sm"></i>Referral Link
                         </h3>
                         <div class="flex gap-2">
-                            <input type="text" readonly id="ref-link" value="https://primo-max.vercel.app/?ref=${currentUser.id}" class="w-full p-2.5 bg-white border border-orange-200 rounded-xl text-xs text-gray-600 font-mono">
-                            <button onclick="copyRef()" class="bg-orange-600 hover:bg-orange-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition shadow"><i class="fa-solid fa-copy"></i></button>
+                            <input type="text" readonly id="ref-link" value="https://primo-max.vercel.app/?ref=${currentUser.id}" class="w-full p-2.5 bg-white border border-amber-200 rounded-xl text-xs text-gray-600 font-mono">
+                            <button onclick="copyRef()" class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition shadow"><i class="fa-solid fa-copy"></i></button>
                         </div>
                     </div>
                 </div>
@@ -614,7 +617,6 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Convert image to Base64 string for direct saving without needing storage buckets setup
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const base64Image = e.target.result;
