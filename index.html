@@ -240,20 +240,21 @@
             }
 
             return `
-                <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl mb-24">
-                    <!-- Balance Card -->
-                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-5 rounded-2xl text-white shadow-lg shadow-amber-600/20 flex items-center justify-between mb-4">
+                <div class="bg-white rounded-3xl p-6 border border-amber-100 shadow-xl mb-24">
+                    <!-- Modern Balance Card matching Wallet style -->
+                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-5 rounded-2xl text-white shadow-lg shadow-amber-600/20 flex items-center justify-between mb-5">
                         <div>
                             <h2 class="text-3xl font-black">$${Number(currentUser.balance || 0).toFixed(3)}</h2>
                             <p class="text-[11px] text-amber-100 uppercase font-extrabold tracking-wider mt-0.5"><i class="fa-solid fa-wallet mr-1.5"></i>Available Balance</p>
                         </div>
-                        <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-sm">
-                            <i class="fa-solid fa-chart-line text-xl"></i>
+                        <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-sm text-right">
+                            <span class="text-[10px] text-amber-100 font-bold block">Daily Reward</span>
+                            <span class="text-sm font-black text-white">Active</span>
                         </div>
                     </div>
                     
                     <!-- Daily Earning Tasks Button / Dropdown -->
-                    <div class="mb-4">
+                    <div class="mb-5">
                         ${!showTasksView ? `
                             <button onclick="toggleTasksView()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white p-4 rounded-2xl font-bold shadow-md transition flex items-center justify-between">
                                 <span class="flex items-center gap-2.5 text-xs uppercase tracking-wider font-extrabold">
@@ -262,7 +263,7 @@
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
                         ` : `
-                            <div class="p-4 bg-amber-50/50 rounded-2xl border border-amber-200/80">
+                            <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/80">
                                 <div class="flex items-center justify-between mb-3">
                                     <h3 class="font-extrabold text-xs text-amber-900 flex items-center uppercase tracking-wide">
                                         <i class="fa-solid fa-list-check mr-2 text-amber-600 text-sm"></i>Daily Tasks (Earn $0.025)
@@ -289,7 +290,7 @@
                     </div>
 
                     <!-- Referral Link Section -->
-                    <div class="p-4 bg-amber-50/40 rounded-2xl border border-amber-200/70">
+                    <div class="p-4 bg-amber-50/50 rounded-2xl border border-amber-200/70">
                         <h3 class="font-extrabold text-xs text-amber-900 mb-2 flex items-center uppercase tracking-wider">
                             <i class="fa-solid fa-share-nodes mr-2 text-amber-600 text-sm"></i>Referral Link
                         </h3>
