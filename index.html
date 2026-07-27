@@ -407,6 +407,7 @@
                             <option>JazzCash</option>
                             <option>U Paisa</option>
                         </select>
+                        <input type="number" step="any" id="withdraw-amount" placeholder="Enter Amount to Withdraw ($)" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                         <input type="text" id="acc-num" placeholder="Account Number" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                         <input type="text" id="acc-name" placeholder="Account Holder Name" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
@@ -419,35 +420,56 @@
 
         async function handleWithdraw() {
             const method = document.getElementById('withdraw-method').value;
+            const withdrawAmountInput = document.getElementById('withdraw-amount').value;
             const accNum = document.getElementById('acc-num').value;
             const accName = document.getElementById('acc-name').value;
             const currentBalance = Number(currentUser.balance || 0);
+            const requestedAmount = Number(withdrawAmountInput);
 
-            if (!accNum || !accName) {
-                alert('Please fill all withdrawal fields!');
+            if (!withdrawAmountInput || !accNum || !accName) {
+                alert('Please fill all withdrawal fields including amount!');
                 return;
             }
 
-            if (currentBalance < 0.50) {
-                alert('Minimum withdrawal amount is $0.50! Your balance is $' + currentBalance.toFixed(3));
+            if (requestedAmount < 0.50) {
+                alert('Minimum withdrawal amount is $0.50!');
+                return;
+            }
+
+            if (requestedAmount > currentBalance) {
+                alert('You do not have enough balance! Your current balance is $' + currentBalance.toFixed(3));
                 return;
             }
 
             try {
-                const { error } = await supabaseClient.from('withdrawals').insert([{
+                // Insert withdrawal request
+                const { error: insertError } = await supabaseClient.from('withdrawals').insert([{
                     user_id: currentUser.id,
                     email: currentUser.email,
+                    method: method,
                     account_number: accNum,
                     account_holder: accName,
-                    amount: currentBalance,
+                    amount: requestedAmount,
                     status: 'pending'
                 }]);
 
-                if (error) {
-                    console.error(error);
-                    alert('Error: ' + error.message);
+                if (insertError) {
+                    console.error(insertError);
+                    alert('Error: ' + insertError.message);
+                    return;
+                }
+
+                // Deduct amount from user balance instantly
+                currentUser.balance = currentBalance - requestedAmount;
+                const { error: updateError } = await supabaseClient.from('users').update({ balance: currentUser.balance }).eq('id', currentUser.id);
+
+                if (updateError) {
+                    console.error(updateError);
+                    alert('Request submitted but failed to update balance: ' + updateError.message);
                 } else {
-                    alert('Withdrawal request submitted successfully!');
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    alert('Withdrawal request submitted successfully! Amount has been deducted from your balance.');
+                    render();
                 }
             } catch(e) {
                 console.log(e);
