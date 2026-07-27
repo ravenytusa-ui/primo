@@ -19,9 +19,8 @@
 
         let currentUser = JSON.parse(localStorage.getItem('user')) || null;
         let currentTab = 'home';
-        let authMode = 'login'; // Track login or signup view
+        let authMode = 'login';
 
-        // Check URL for referral parameter
         const urlParams = new URLSearchParams(window.location.search);
         const refId = urlParams.get('ref');
         if(refId && !currentUser) {
