@@ -58,10 +58,10 @@
                         <input type="text" id="phone" placeholder="Phone Number" class="w-full p-3 mb-3 border rounded-xl">
                         <input type="text" id="referral" placeholder="Referral Code (Optional)" class="w-full p-3 mb-3 border rounded-xl">
                         <button onclick="handleSignup()" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold mb-3">Sign Up</button>
-                        <p class="text-center text-sm text-amber-700 cursor-pointer" onclick="renderAuth('login')">Already have an account? Login</p>
+                        <p class="text-center text-sm text-amber-700 cursor-pointer mt-2">Already have an account? <span onclick="renderAuth('login')" class="font-bold underline">Login</span></p>
                     ` : `
                         <button onclick="handleLogin()" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold mb-3">Login</button>
-                        <p class="text-center text-sm text-amber-700 cursor-pointer" onclick="renderAuth('signup')">Don't have an account? Sign Up</p>
+                        <p class="text-center text-sm text-amber-700 cursor-pointer mt-2">Don't have an account? <span onclick="renderAuth('signup')" class="font-bold underline">Sign Up</span></p>
                     `}
                 </div>
             `;
