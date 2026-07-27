@@ -24,6 +24,7 @@
         let isWaitingForApproval = false;
         let showTasksView = false;
         let teamMembersCache = [];
+        let withdrawalsCache = [];
 
         const urlParams = new URLSearchParams(window.location.search);
         const refId = urlParams.get('ref');
@@ -53,6 +54,9 @@
             if (currentTab === 'stats') {
                 const { data } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.id);
                 teamMembersCache = data || [];
+            } else if (currentTab === 'wallet') {
+                const { data } = await supabaseClient.from('withdrawals').select('*').eq('user_id', currentUser.id).order('id', { ascending: false });
+                withdrawalsCache = data || [];
             }
 
             let content = '';
@@ -384,6 +388,22 @@
         }
 
         function renderWallet() {
+            let historyHtml = withdrawalsCache.length > 0 ? 
+                withdrawalsCache.map(w => {
+                    let statusColor = w.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200';
+                    let statusText = w.status === 'approved' ? 'Approved' : 'Pending';
+                    return `
+                        <div class="bg-amber-50/50 p-3 rounded-2xl border border-amber-100 mb-2 flex items-center justify-between text-xs">
+                            <div>
+                                <p class="font-black text-amber-900">$${Number(w.amount).toFixed(2)} (${w.method || 'SadaPay'})</p>
+                                <p class="text-[10px] text-amber-700 mt-0.5">Acc: ${w.account_number}</p>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-xl font-bold uppercase text-[10px] border ${statusColor}">${statusText}</span>
+                        </div>
+                    `;
+                }).join('') :
+                `<p class="text-xs text-amber-700 italic text-center py-3">No withdrawal requests found.</p>`;
+
             return `
                 <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl mb-24">
                     <h2 class="text-lg font-extrabold text-amber-900 mb-3 flex items-center"><i class="fa-solid fa-wallet text-amber-600 mr-2"></i>Withdrawal Wallet</h2>
@@ -411,9 +431,20 @@
                         <input type="text" id="acc-num" placeholder="Account Number" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                         <input type="text" id="acc-name" placeholder="Account Holder Name" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
-                    <button onclick="handleWithdraw()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3.5 rounded-2xl font-bold transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2">
+                    
+                    <button onclick="handleWithdraw()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3.5 rounded-2xl font-bold transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 mb-6">
                         <i class="fa-solid fa-money-bill-transfer"></i> Withdraw
                     </button>
+
+                    <!-- Withdrawal History Section -->
+                    <div class="border-t border-amber-100 pt-4">
+                        <h3 class="font-extrabold text-xs text-amber-900 mb-3 uppercase tracking-wide flex items-center">
+                            <i class="fa-solid fa-clock-rotate-left mr-2 text-amber-600"></i>Withdrawal History & Status
+                        </h3>
+                        <div class="max-h-48 overflow-y-auto pr-1">
+                            ${historyHtml}
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -442,7 +473,7 @@
             }
 
             try {
-                // Insert withdrawal request
+                // Insert withdrawal request with method
                 const { error: insertError } = await supabaseClient.from('withdrawals').insert([{
                     user_id: currentUser.id,
                     email: currentUser.email,
@@ -468,7 +499,7 @@
                     alert('Request submitted but failed to update balance: ' + updateError.message);
                 } else {
                     localStorage.setItem('user', JSON.stringify(currentUser));
-                    alert('Withdrawal request submitted successfully! Amount has been deducted from your balance.');
+                    alert('Withdrawal request submitted successfully!');
                     render();
                 }
             } catch(e) {
