@@ -50,7 +50,6 @@
                 return;
             }
 
-            // Pre-fetch stats if on stats tab
             if (currentTab === 'stats') {
                 const { data } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.id);
                 teamMembersCache = data || [];
@@ -136,6 +135,9 @@
                         <p class="text-xs text-amber-700 mb-6 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-200/70">
                             <i class="fa-regular fa-clock text-amber-600 mr-1"></i> Please wait for approval. <br><b class="text-amber-900 mt-1 inline-block">Wait for approve 15 to 25 min</b>.
                         </p>
+                        <button onclick="checkApprovalStatus()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-2xl font-bold text-xs transition shadow-md flex items-center justify-center gap-2 mb-3">
+                            <i class="fa-solid fa-rotate"></i> Check Approval Status
+                        </button>
                         <button onclick="logout()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 p-3.5 rounded-2xl font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout / Exit
                         </button>
@@ -176,6 +178,18 @@
             `;
         }
 
+        async function checkApprovalStatus() {
+            const { data } = await supabaseClient.from('users').select('*').eq('id', currentUser.id).single();
+            if (data && data.status === 'approved') {
+                currentUser = data;
+                localStorage.setItem('user', JSON.stringify(currentUser));
+                isWaitingForApproval = false;
+                render();
+            } else {
+                alert('Your payment is still pending approval. Please wait.');
+            }
+        }
+
         async function submitDepositProof() {
             const trxId = document.getElementById('trx-id').value;
             const senderAcc = document.getElementById('sender-acc').value;
@@ -200,7 +214,7 @@
                 console.log(e);
             }
 
-            alert('Payment proof submitted successfully! Please wait for approval (15 to 25 mins).');
+            alert('Payment proof submitted successfully! Please wait for approval.');
             isWaitingForApproval = true;
             render();
         }
@@ -273,7 +287,7 @@
                             <i class="fa-solid fa-share-nodes mr-2 text-orange-600 text-sm"></i>Referral Link
                         </h3>
                         <div class="flex gap-2">
-                            <input type="text" readonly id="ref-link" value="https://primo-gray.vercel.app/?ref=${currentUser.id}" class="w-full p-2.5 bg-white border border-orange-200 rounded-xl text-xs text-gray-600 font-mono">
+                            <input type="text" readonly id="ref-link" value="https://primo-max.vercel.app/?ref=${currentUser.id}" class="w-full p-2.5 bg-white border border-orange-200 rounded-xl text-xs text-gray-600 font-mono">
                             <button onclick="copyRef()" class="bg-orange-600 hover:bg-orange-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition shadow"><i class="fa-solid fa-copy"></i></button>
                         </div>
                     </div>
@@ -373,10 +387,19 @@
             return `
                 <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl mb-24">
                     <h2 class="text-lg font-extrabold text-amber-900 mb-3 flex items-center"><i class="fa-solid fa-wallet text-amber-600 mr-2"></i>Withdrawal Wallet</h2>
-                    <p class="text-xs text-amber-700 mb-4 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-100 flex items-center justify-between">
-                        <span>Balance:</span>
-                        <span class="font-black text-amber-900 text-sm bg-white px-3 py-1 rounded-xl border border-amber-200">$${Number(currentUser.balance || 0).toFixed(3)}</span>
-                    </p>
+                    
+                    <!-- Top Balance Box -->
+                    <div class="mb-4 bg-gradient-to-r from-amber-500 to-amber-600 p-4 rounded-2xl text-white shadow-lg shadow-amber-600/20 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-3xl font-black">$${Number(currentUser.balance || 0).toFixed(3)}</h2>
+                            <p class="text-[11px] text-amber-100 uppercase font-bold tracking-wider mt-0.5"><i class="fa-solid fa-wallet mr-1"></i>Current Balance</p>
+                        </div>
+                        <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-sm text-right">
+                            <p class="text-[10px] text-amber-100 font-bold">Minimum Withdraw</p>
+                            <p class="text-sm font-black text-white">$0.50</p>
+                        </div>
+                    </div>
+
                     <div class="space-y-3 mb-4">
                         <select id="withdraw-method" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
                             <option>SadaPay</option>
@@ -387,11 +410,49 @@
                         <input type="text" id="acc-num" placeholder="Account Number" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                         <input type="text" id="acc-name" placeholder="Account Holder Name" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
-                    <button onclick="alert('Withdrawal request submitted successfully!')" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3.5 rounded-2xl font-bold transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2">
+                    <button onclick="handleWithdraw()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3.5 rounded-2xl font-bold transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-money-bill-transfer"></i> Withdraw
                     </button>
                 </div>
             `;
+        }
+
+        async function handleWithdraw() {
+            const method = document.getElementById('withdraw-method').value;
+            const accNum = document.getElementById('acc-num').value;
+            const accName = document.getElementById('acc-name').value;
+            const currentBalance = Number(currentUser.balance || 0);
+
+            if (!accNum || !accName) {
+                alert('Please fill all withdrawal fields!');
+                return;
+            }
+
+            if (currentBalance < 0.50) {
+                alert('Minimum withdrawal amount is $0.50! Your balance is $' + currentBalance.toFixed(3));
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient.from('withdrawals').insert([{
+                    user_id: currentUser.id,
+                    email: currentUser.email,
+                    account_number: accNum,
+                    account_holder: accName,
+                    amount: currentBalance,
+                    status: 'pending'
+                }]);
+
+                if (error) {
+                    console.error(error);
+                    alert('Error: ' + error.message);
+                } else {
+                    alert('Withdrawal request submitted successfully!');
+                }
+            } catch(e) {
+                console.log(e);
+                alert('Error submitting withdrawal request.');
+            }
         }
 
         function renderProfile() {
