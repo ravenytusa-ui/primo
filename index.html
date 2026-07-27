@@ -397,12 +397,13 @@
 
             if(error) {
                 alert('Error: ' + error.message);
-            } else {
-                currentUser = data;
-                localStorage.setItem('user', JSON.stringify(data));
-                localStorage.removeItem('refId');
-                render();
-            }
+           } else {
+        currentUser = data;
+        localStorage.setItem('user', JSON.stringify(data));
+        localStorage.removeItem('refId');
+        isWaitingForApproval = false; // Yeh line lazmi add karni hai
+        render();
+    }
         }
 
         async function handleLogin() {
