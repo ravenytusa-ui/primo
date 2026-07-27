@@ -22,7 +22,8 @@
         let currentTab = 'home';
         let authMode = 'login';
         let isWaitingForApproval = false;
-        let showTasksView = false; // Controls task section visibility
+        let showTasksView = false;
+        let teamMembersCache = [];
 
         const urlParams = new URLSearchParams(window.location.search);
         const refId = urlParams.get('ref');
@@ -47,6 +48,12 @@
             if (currentUser.status === 'pending' || isWaitingForApproval) {
                 app.innerHTML = renderWaitingPage();
                 return;
+            }
+
+            // Pre-fetch stats if on stats tab
+            if (currentTab === 'stats') {
+                const { data } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.id);
+                teamMembersCache = data || [];
             }
 
             let content = '';
@@ -163,9 +170,8 @@
                         </div>
                     </div>
                     
-                    <!-- Task Trigger Button or Tasks View -->
                     <div class="mt-4">
-                        {!showTasksView ? `
+                        ${!showTasksView ? `
                             <button onclick="toggleTasksView()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white p-4 rounded-2xl font-bold shadow-lg shadow-amber-600/30 transition flex items-center justify-between">
                                 <span class="flex items-center gap-2 text-sm">
                                     <i class="fa-solid fa-list-check text-lg"></i> Daily Earning Tasks
@@ -266,12 +272,11 @@
             alert("Referral link copied!");
         }
 
-        async function renderStats() {
-            const { data: teamMembers } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.id);
-            const count = teamMembers ? teamMembers.length : 0;
+        function renderStats() {
+            const count = teamMembersCache.length;
             
-            let membersListHtml = teamMembers && teamMembers.length > 0 ? 
-                teamMembers.map(m => `<p class="text-xs text-amber-800 bg-amber-50/50 p-3 rounded-xl border border-amber-100 mb-1.5 flex items-center"><i class="fa-solid fa-user-check text-amber-600 mr-2"></i><b>${m.name}</b> &nbsp;(${m.email})</p>`).join('') :
+            let membersListHtml = teamMembersCache.length > 0 ? 
+                teamMembersCache.map(m => `<p class="text-xs text-amber-800 bg-amber-50/50 p-3 rounded-xl border border-amber-100 mb-1.5 flex items-center"><i class="fa-solid fa-user-check text-amber-600 mr-2"></i><b>${m.name}</b> &nbsp;(${m.email})</p>`).join('') :
                 `<p class="text-xs text-amber-700 italic text-center py-2">No members added yet.</p>`;
 
             return `
@@ -381,7 +386,7 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            showTasksView = false; // Reset task view when changing tabs
+            showTasksView = false;
             render();
         }
 
