@@ -50,7 +50,6 @@
                 return;
             }
 
-            // Pre-fetch stats if on stats tab
             if (currentTab === 'stats') {
                 const { data } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.id);
                 teamMembersCache = data || [];
@@ -126,70 +125,83 @@
         }
 
         function renderWaitingPage() {
-    return `
-        <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 mt-6 mb-12">
-            <div class="text-center mb-4">
-                <div class="inline-flex items-center justify-center w-12 h-12 bg-amber-100 text-amber-700 rounded-full text-xl mb-2 shadow-inner">
-                    <i class="fa-solid fa-wallet"></i>
+            if (isWaitingForApproval) {
+                return `
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border border-amber-100 mt-12 text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="animate-spin rounded-full h-12 w-12 border-4 border-amber-600 border-t-transparent"></div>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-amber-900 mb-2">Payment Verification</h2>
+                        <p class="text-xs text-amber-700 mb-6 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-200/70">
+                            <i class="fa-regular fa-clock text-amber-600 mr-1"></i> Please wait for approval. <br><b class="text-amber-900 mt-1 inline-block">Wait for approve 15 to 25 min</b>.
+                        </p>
+                        <button onclick="logout()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 p-3.5 rounded-2xl font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout / Exit
+                        </button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 mt-6 mb-12">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-12 h-12 bg-amber-100 text-amber-700 rounded-full text-xl mb-2 shadow-inner">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-amber-900">Deposit via SadaPay</h2>
+                        <p class="text-xs text-amber-700 mt-1">Please send <b>520 PKR</b> to the account details below:</p>
+                    </div>
+
+                    <div class="bg-amber-50/60 p-4 rounded-2xl border border-amber-200/80 mb-4 text-xs space-y-1.5 text-amber-900">
+                        <p><b>Account Name:</b> PremoMax Official</p>
+                        <p><b>Account Number:</b> 03123456789</p>
+                        <p><b>Amount:</b> 520 PKR</p>
+                    </div>
+
+                    <div class="space-y-3 mb-4">
+                        <input type="text" id="trx-id" placeholder="Transaction ID / Trx ID" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        <input type="text" id="sender-acc" placeholder="Sender Account Number (e.g. 03XXXXXXXXX)" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        <input type="text" id="sender-name" placeholder="Sender Account Holder Name" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+
+                    <button onclick="submitDepositProof()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 mb-3">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Payment Proof
+                    </button>
+
+                    <button onclick="logout()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 p-3 rounded-2xl font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout / Exit
+                    </button>
                 </div>
-                <h2 class="text-xl font-extrabold text-amber-900">Deposit via SadaPay</h2>
-                <p class="text-xs text-amber-700 mt-1">Please send <b>520 PKR</b> to the account details below:</p>
-            </div>
-
-            <!-- Account Details Box -->
-            <div class="bg-amber-50/60 p-4 rounded-2xl border border-amber-200/80 mb-4 text-xs space-y-1.5 text-amber-900">
-                <p><b>Account Name:</b> PremoMax Official</p>
-                <p><b>Account Number:</b> 03123456789</p>
-                <p><b>Amount:</b> 520 PKR</p>
-            </div>
-
-            <!-- Transaction Details Form -->
-            <div class="space-y-3 mb-4">
-                <input type="text" id="trx-id" placeholder="Transaction ID / Trx ID" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
-                <input type="text" id="sender-acc" placeholder="Sender Account Number (e.g. 03XXXXXXXXX)" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
-                <input type="text" id="sender-name" placeholder="Sender Account Holder Name" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
-            </div>
-
-            <button onclick="submitDepositProof()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 mb-3">
-                <i class="fa-solid fa-paper-plane"></i> Submit Payment Proof
-            </button>
-
-            <button onclick="logout()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 p-3 rounded-2xl font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout / Exit
-            </button>
-        </div>
-    `;
-}
-
-async function submitDepositProof() {
-    const trxId = document.getElementById('trx-id').value;
-    const senderAcc = document.getElementById('sender-acc').value;
-    const senderName = document.getElementById('sender-name').value;
-
-    if (!trxId || !senderAcc || !senderName) {
-        alert('Please fill all 3 boxes with your transaction details!');
-        return;
-    }
-
-    try {
-        await supabaseClient.from('deposits').insert([{
-            user_id: currentUser.id,
-            email: currentUser.email,
-            trx_id: trxId,
-            sender_account: senderAcc,
-            sender_name: senderName,
-            amount: '520 PKR',
-            status: 'pending'
-        }]);
-    } catch(e) {
-        console.log(e);
-    }
-
-    alert('Payment proof submitted successfully! Please wait for approval (15 to 25 mins).');
-    isWaitingForApproval = true;
-    render();
-}
             `;
+        }
+
+        async function submitDepositProof() {
+            const trxId = document.getElementById('trx-id').value;
+            const senderAcc = document.getElementById('sender-acc').value;
+            const senderName = document.getElementById('sender-name').value;
+
+            if (!trxId || !senderAcc || !senderName) {
+                alert('Please fill all 3 boxes with your transaction details!');
+                return;
+            }
+
+            try {
+                await supabaseClient.from('deposits').insert([{
+                    user_id: currentUser.id,
+                    email: currentUser.email,
+                    trx_id: trxId,
+                    sender_account: senderAcc,
+                    sender_name: senderName,
+                    amount: '520 PKR',
+                    status: 'pending'
+                }]);
+            } catch(e) {
+                console.log(e);
+            }
+
+            alert('Payment proof submitted successfully! Please wait for approval (15 to 25 mins).');
+            isWaitingForApproval = true;
+            render();
         }
 
         function renderHome() {
@@ -221,7 +233,7 @@ async function submitDepositProof() {
                     </div>
                     
                     <div class="mt-4">
-                        ${!showTasksView ? `
+                        {!showTasksView ? `
                             <button onclick="toggleTasksView()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white p-4 rounded-2xl font-bold shadow-lg shadow-amber-600/30 transition flex items-center justify-between">
                                 <span class="flex items-center gap-2 text-sm">
                                     <i class="fa-solid fa-list-check text-lg"></i> Daily Earning Tasks
@@ -458,7 +470,7 @@ async function submitDepositProof() {
             }
 
             const { data, error } = await supabaseClient.from('users').insert([{
-                name, email, password, phone, status: 'pending', balance: 0.00, referred_by: referredBy ? Number(referredBy) : null
+                name, email, password, phone, status: 'pending', balance: 0.00, referred_by: referredBy
             }]).select().single();
 
             if(error) {
@@ -467,6 +479,7 @@ async function submitDepositProof() {
                 currentUser = data;
                 localStorage.setItem('user', JSON.stringify(data));
                 localStorage.removeItem('refId');
+                isWaitingForApproval = false;
                 render();
             }
         }
@@ -481,6 +494,7 @@ async function submitDepositProof() {
             } else {
                 currentUser = data;
                 localStorage.setItem('user', JSON.stringify(currentUser));
+                isWaitingForApproval = false;
                 render();
             }
         }
