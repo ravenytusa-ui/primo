@@ -3,205 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Primo Max</title>
+    <title>Primo Max - Stats</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-amber-50/30 text-amber-950 font-sans antialiased">
 
-    <!-- App Container -->
-    <div id="app" class="max-w-md mx-auto min-h-screen relative pb-20">
-        <!-- Main Content Area Rendered via JavaScript -->
-        <div id="main-content"></div>
+    <div class="max-w-md mx-auto min-h-screen relative pb-24 px-4 pt-4 space-y-4">
+        
+        <!-- Top Hero Banner -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-6 text-white shadow-xl shadow-orange-500/20">
+            <div class="flex items-center justify-between mb-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-bold uppercase">
+                    <i class="fa-solid fa-users text-amber-200"></i> My Team Network
+                </span>
+                <span class="px-3 py-1 rounded-full bg-black/20 text-xs font-extrabold text-amber-100">
+                    Level 1
+                </span>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <h2 class="text-4xl font-black">3</h2>
+                <p class="text-xs font-semibold text-amber-100/90 uppercase">Total Members Added</p>
+            </div>
+        </div>
 
-        <!-- Bottom Navigation Bar -->
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 backdrop-blur-md border-t border-amber-100 px-6 py-3 flex justify-between items-center shadow-lg z-50">
-            <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-amber-600" data-tab="home">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Home</span>
-            </button>
-            <button onclick="switchTab('stats')" class="nav-btn flex flex-col items-center text-amber-600" data-tab="stats">
-                <i class="fa-solid fa-chart-pie text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Stats</span>
-            </button>
-            <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center text-amber-400" data-tab="wallet">
-                <i class="fa-solid fa-wallet text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Wallet</span>
-            </button>
-            <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center text-amber-400" data-tab="profile">
-                <i class="fa-solid fa-user text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Profile</span>
-            </button>
-            <button onclick="switchTab('exit')" class="nav-btn flex flex-col items-center text-red-500" data-tab="exit">
-                <i class="fa-solid fa-power-off text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Exit</span>
-            </button>
-        </nav>
+        <!-- Quick Stats Grid -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm text-center">
+                <p class="text-[10px] text-amber-800/70 font-extrabold uppercase">Team Size</p>
+                <p class="text-xl font-black text-amber-950 mt-0.5">3</p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm text-center">
+                <p class="text-[10px] text-amber-800/70 font-extrabold uppercase">Level</p>
+                <p class="text-xl font-black text-amber-950 mt-0.5">1</p>
+            </div>
+        </div>
+
+        <!-- Milestone Goals -->
+        <div class="space-y-3">
+            <!-- Goal 1 (3 Dollar) -->
+            <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-black text-amber-950">Add 10 member for 3 dollar reward</p>
+                    <p class="text-[10px] text-amber-700 font-bold mt-1">Progress: 3/10</p>
+                </div>
+                <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase">Reward</span>
+            </div>
+
+            <!-- Goal 2 (7 Dollar) -->
+            <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-black text-amber-950">Add 20 users for 7 dollar reward</p>
+                    <p class="text-[10px] text-amber-700 font-bold mt-1">Progress: 3/20</p>
+                </div>
+                <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase">Reward</span>
+            </div>
+
+            <!-- Goal 3 -->
+            <div class="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-black text-amber-950">Add 30 member for weekly salary</p>
+                    <p class="text-[10px] text-amber-700 font-bold mt-1">Progress: 3/30</p>
+                </div>
+                <span class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black uppercase">Salary</span>
+            </div>
+        </div>
+
+        <!-- Team Members Directory -->
+        <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-sm space-y-2.5">
+            <h3 class="text-xs font-black uppercase text-amber-900 border-b pb-2">Team Members Directory (3 Total)</h3>
+            <div class="bg-amber-50/50 p-3 rounded-2xl flex justify-between items-center"><span class="text-xs font-bold">111</span><span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Active</span></div>
+            <div class="bg-amber-50/50 p-3 rounded-2xl flex justify-between items-center"><span class="text-xs font-bold">wewe</span><span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Active</span></div>
+            <div class="bg-amber-50/50 p-3 rounded-2xl flex justify-between items-center"><span class="text-xs font-bold">Raven</span><span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Active</span></div>
+        </div>
+
     </div>
 
-    <script>
-        // Team Members Data Cache matching your current active members
-        let teamMembersCache = [
-            { name: "111", phone: "111", status: "Active" },
-            { name: "wewe", phone: "wewe", status: "Active" },
-            { name: "Raven", phone: "ravenytusa@gmail.com", status: "Active" }
-        ];
-
-        function renderStats() {
-            const count = teamMembersCache.length;
-
-            let membersListHtml = teamMembersCache.length > 0 ? 
-                teamMembersCache.map(m => `
-                    <div class="bg-amber-50/50 p-3 rounded-2xl border border-amber-200/60 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs font-black text-amber-950">${m.name}</p>
-                                <p class="text-[10px] text-amber-600 font-semibold">${m.phone}</p>
-                            </div>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">${m.status}</span>
-                    </div>
-                `).join('') : 
-                `<div class="text-center py-6 bg-amber-50/40 rounded-2xl border border-dashed border-amber-200"><i class="fa-solid fa-users-slash text-amber-400 text-2xl mb-1"></i><p class="text-xs text-amber-700 font-medium">No team members yet</p></div>`;
-
-            return `
-                <div class="space-y-4 pb-24 max-w-md mx-auto px-4 pt-4">
-                    
-                    <!-- Top Hero Banner -->
-                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-6 text-white shadow-xl shadow-orange-500/20">
-                        <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-                        <div class="absolute -left-8 -bottom-8 w-32 h-32 bg-black/10 rounded-full blur-2xl pointer-events-none"></div>
-                        
-                        <div class="relative z-10">
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold uppercase tracking-wider">
-                                    <i class="fa-solid fa-users text-amber-200"></i> My Team Network
-                                </span>
-                                <span class="px-3 py-1 rounded-full bg-black/20 backdrop-blur-md text-xs font-extrabold text-amber-100">
-                                    Level 1
-                                </span>
-                            </div>
-                            
-                            <div class="flex items-baseline gap-2">
-                                <h2 class="text-4xl font-black tracking-tight">${count}</h2>
-                                <p class="text-xs font-semibold text-amber-100/90 uppercase tracking-wide">Total Members Added</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Stats Grid (2 Columns) -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-white/90 backdrop-blur-xl p-4 rounded-2xl border border-amber-100/80 shadow-lg shadow-amber-500/5 text-center">
-                            <div class="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold">
-                                <i class="fa-solid fa-user-group"></i>
-                            </div>
-                            <p class="text-[10px] text-amber-800/70 font-extrabold uppercase tracking-wider">Team Size</p>
-                            <p class="text-xl font-black text-amber-950 mt-0.5">${count}</p>
-                        </div>
-
-                        <div class="bg-white/90 backdrop-blur-xl p-4 rounded-2xl border border-amber-100/80 shadow-lg shadow-amber-500/5 text-center">
-                            <div class="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold">
-                                <i class="fa-solid fa-layer-group"></i>
-                            </div>
-                            <p class="text-[10px] text-amber-800/70 font-extrabold uppercase tracking-wider">Level</p>
-                            <p class="text-xl font-black text-amber-950 mt-0.5">1</p>
-                        </div>
-                    </div>
-
-                    <!-- Milestone Goals / Rewards Section -->
-                    <div class="space-y-3">
-                        
-                        <!-- Goal 1 (Updated to 3 dollar) -->
-                        <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 flex items-center justify-center font-bold text-base shadow-inner">
-                                    <i class="fa-solid fa-award"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-black text-amber-950">Add 10 member for 3 dollar reward</p>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <div class="w-24 h-2 bg-amber-100 rounded-full overflow-hidden">
-                                            <div class="bg-amber-500 h-full rounded-full" style="width: ${Math.min((count/10)*100, 100)}%"></div>
-                                        </div>
-                                        <span class="text-[10px] text-amber-700 font-bold">Progress: ${count}/10</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-200/50">Reward</span>
-                        </div>
-
-                        <!-- Goal 2 (Updated to 7 dollar) -->
-                        <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 flex items-center justify-center font-bold text-base shadow-inner">
-                                    <i class="fa-solid fa-gift"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-black text-amber-950">Add 20 users for 7 dollar reward</p>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <div class="w-24 h-2 bg-amber-100 rounded-full overflow-hidden">
-                                            <div class="bg-amber-500 h-full rounded-full" style="width: ${Math.min((count/20)*100, 100)}%"></div>
-                                        </div>
-                                        <span class="text-[10px] text-amber-700 font-bold">Progress: ${count}/20</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-200/50">Reward</span>
-                        </div>
-
-                        <!-- Goal 3 -->
-                        <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-orange-500/20">
-                                    <i class="fa-solid fa-trophy"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-black text-amber-950">Add 30 member for weekly salary</p>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <div class="w-24 h-2 bg-amber-100 rounded-full overflow-hidden">
-                                            <div class="bg-amber-600 h-full rounded-full" style="width: ${Math.min((count/30)*100, 100)}%"></div>
-                                        </div>
-                                        <span class="text-[10px] text-amber-700 font-bold">Progress: ${count}/30</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">Salary</span>
-                        </div>
-                    </div>
-
-                    <!-- Team Members Directory -->
-                    <div class="bg-white rounded-3xl p-5 border border-amber-100/80 shadow-lg shadow-amber-500/5">
-                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-amber-50">
-                            <h3 class="text-xs font-black uppercase tracking-wider text-amber-900 flex items-center gap-2">
-                                <i class="fa-solid fa-list-ul text-amber-600"></i> Team Members Directory
-                            </h3>
-                            <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 text-[10px] font-black">${count} Total</span>
-                        </div>
-                        
-                        <div class="max-h-52 overflow-y-auto pr-1 space-y-2.5">
-                            ${membersListHtml}
-                        </div>
-                    </div>
-
-                </div>
-            `;
-        }
-
-        function switchTab(tab) {
-            const container = document.getElementById('main-content');
-            if (tab === 'stats') {
-                container.innerHTML = renderStats();
-            } else {
-                container.innerHTML = `<div class="p-8 text-center text-amber-800 font-bold">Welcome to ${tab.toUpperCase()} page</div>`;
-            }
-        }
-
-        window.onload = () => {
-            switchTab('stats');
-        };
-    </script>
 </body>
 </html>
