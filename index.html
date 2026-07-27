@@ -20,12 +20,26 @@
         let currentUser = JSON.parse(localStorage.getItem('user')) || null;
         let currentTab = 'home';
 
+        // Check URL for referral parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const refId = urlParams.get('ref');
+        if(refId && !currentUser) {
+            localStorage.setItem('refId', refId);
+        }
+
         async function render() {
             const app = document.getElementById('app');
             
             if (!currentUser) {
                 app.innerHTML = renderAuth('login');
                 return;
+            }
+
+            // Refresh user data from DB to check status updates (like Admin approval)
+            const { data: freshUser } = await supabaseClient.from('users').select('*').eq('id', currentUser.id).single();
+            if(freshUser) {
+                currentUser = freshUser;
+                localStorage.setItem('user', JSON.stringify(currentUser));
             }
 
             if (currentUser.status === 'pending') {
@@ -45,6 +59,7 @@
             `;
         }
 
+        // --- AUTH SECTION ---
         function renderAuth(type) {
             let isLoginMode = (type === 'login');
             return `
@@ -56,24 +71,24 @@
                     ${!isLoginMode ? `
                         <input type="password" id="retypepassword" placeholder="Retype Password" class="w-full p-3 mb-3 border rounded-xl">
                         <input type="text" id="phone" placeholder="Phone Number" class="w-full p-3 mb-3 border rounded-xl">
-                        <input type="text" id="referral" placeholder="Referral Code (Optional)" class="w-full p-3 mb-3 border rounded-xl">
                         <button onclick="handleSignup()" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold mb-3">Sign Up</button>
-                        <p class="text-center text-sm text-amber-700 cursor-pointer mt-2">Already have an account? <span onclick="renderAuth('login')" class="font-bold underline">Login</span></p>
+                        <p onclick="renderAuth('login')" class="text-center text-sm text-amber-700 cursor-pointer mt-2 underline font-semibold">Already have an account? Login</p>
                     ` : `
                         <button onclick="handleLogin()" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold mb-3">Login</button>
-                        <p class="text-center text-sm text-amber-700 cursor-pointer mt-2">Don't have an account? <span onclick="renderAuth('signup')" class="font-bold underline">Sign Up</span></p>
+                        <p onclick="renderAuth('signup')" class="text-center text-sm text-amber-700 cursor-pointer mt-2 underline font-semibold">Don't have an account? Sign Up</p>
                     `}
                 </div>
             `;
         }
 
+        // --- DEPOSIT PAGE SECTION ---
         function renderDepositPage() {
             return `
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200 mt-6">
                     <h2 class="text-xl font-bold text-amber-900 mb-2">Deposit via SadaPay</h2>
                     <p class="text-sm text-amber-700 mb-4 bg-amber-50 p-3 rounded-xl border border-amber-200">Fee: 520 Rs<br>Send payment to SadaPay Account: 0312-3456789</p>
                     <input type="text" id="tid" placeholder="Transaction ID" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
-                    <input type="text" id="holder" placeholder="Account Holder Name (Aapka Naam)" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
+                    <input type="text" id="holder" placeholder="Account Holder Name (Jis se payment ki gayi)" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
                     <input type="text" id="sender" placeholder="Sender Account Number" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
                     <button onclick="submitDeposit()" id="dep-btn" disabled class="w-full bg-gray-300 text-white p-3 rounded-xl font-bold cursor-not-allowed">Proceed Payment</button>
                     <button onclick="logout()" class="w-full mt-3 bg-rose-100 text-rose-600 p-2 rounded-xl font-semibold">Logout / Exit</button>
@@ -113,6 +128,7 @@
             location.reload();
         }
 
+        // --- HOME / TASKS & REFERRAL SECTION ---
         function renderHome() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -122,9 +138,9 @@
                     <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
                         <h3 class="font-bold text-sm text-amber-900 mb-2">Daily Tasks (Earn $0.025 per task)</h3>
                         <div class="space-y-2">
-                            ${renderTaskItem(1, 'https://example.com/site1')}
-                            ${renderTaskItem(2, 'https://example.com/site2')}
-                            ${renderTaskItem(3, 'https://example.com/site3')}
+                            ${renderTaskItem(1, 'https://google.com')}
+                            ${renderTaskItem(2, 'https://youtube.com')}
+                            ${renderTaskItem(3, 'https://wikipedia.org')}
                         </div>
                     </div>
 
@@ -142,10 +158,10 @@
         function renderTaskItem(id, url) {
             return `
                 <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-amber-100 text-xs gap-1">
-                    <span class="truncate w-24">Task ${id}</span>
-                    <button onclick="copyTaskUrl('${url}')" class="bg-amber-200 text-amber-900 px-2 py-1 rounded">Copy</button>
-                    <input type="text" id="task-input-${id}" placeholder="Done" class="w-16 p-1 border rounded text-xs">
-                    <button onclick="completeTask(${id})" class="bg-amber-600 text-white px-2 py-1 rounded">Done</button>
+                    <span class="truncate w-20">Task ${id}</span>
+                    <button onclick="copyTaskUrl('${url}')" class="bg-amber-200 text-amber-900 px-2 py-1 rounded font-semibold">Copy</button>
+                    <input type="text" id="task-input-${id}" placeholder="Type done" class="w-20 p-1 border rounded text-xs">
+                    <button onclick="completeTask(${id})" class="bg-amber-600 text-white px-2 py-1 rounded font-semibold">Done</button>
                 </div>
             `;
         }
@@ -174,11 +190,21 @@
             alert("Referral link copied!");
         }
 
-        function renderStats() {
+        // --- STATS & REWARDS SECTION ---
+        async function renderStats() {
+            const { data: teamMembers } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.id);
+            const count = teamMembers ? teamMembers.length : 0;
+            
+            let membersListHtml = teamMembers && teamMembers.length > 0 ? 
+                teamMembers.map(m => `<p class="text-xs text-amber-800 bg-white p-2 rounded border border-amber-100 mb-1">👤 ${m.name} (${m.email})</p>`).join('') :
+                `<p class="text-xs text-amber-700">No members added yet.</p>`;
+
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
                     <h2 class="text-xl font-bold text-amber-900 mb-3">Team & Statistics</h2>
-                    <p class="text-sm text-amber-700 mb-4">Total Members Added: <span class="font-bold">0</span></p>
+                    <p class="text-sm text-amber-700 mb-3">Total Members Added: <span class="font-bold">${count}</span></p>
+                    <div class="mb-4">${membersListHtml}</div>
+                    
                     <div class="space-y-3">
                         <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
                             <p class="text-xs font-bold text-amber-900">Add 5 members for $21.5 bonus</p>
@@ -194,6 +220,7 @@
             `;
         }
 
+        // --- WALLET SECTION ---
         function renderWallet() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -207,11 +234,12 @@
                     </select>
                     <input type="text" id="acc-num" placeholder="Account Number" class="w-full p-3 mb-3 border rounded-xl">
                     <input type="text" id="acc-name" placeholder="Account Holder Name" class="w-full p-3 mb-3 border rounded-xl">
-                    <button onclick="alert('Withdrawal request submitted!')" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold">Withdraw</button>
+                    <button onclick="alert('Withdrawal request submitted successfully!')" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold">Withdraw</button>
                 </div>
             `;
         }
 
+        // --- PROFILE SECTION ---
         function renderProfile() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -235,6 +263,7 @@
             render();
         }
 
+        // --- BOTTOM NAVIGATION BAR ---
         function renderBottomNav() {
             return `
                 <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-50 bg-white border border-amber-200 rounded-2xl p-2 shadow-lg">
@@ -254,12 +283,14 @@
             render();
         }
 
+        // --- SIGNUP & LOGIN ACTIONS ---
         async function handleSignup() {
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const retype = document.getElementById('retypepassword').value;
             const phone = document.getElementById('phone').value;
+            const referredBy = localStorage.getItem('refId') || null;
             
             if(!name || !email || !password || !phone) {
                 alert('Please fill all fields');
@@ -271,7 +302,7 @@
             }
 
             const { data, error } = await supabaseClient.from('users').insert([{
-                name, email, password, phone, status: 'pending', balance: 0.00
+                name, email, password, phone, status: 'pending', balance: 0.00, referred_by: referredBy ? Number(referredBy) : null
             }]).select().single();
 
             if(error) {
@@ -279,6 +310,7 @@
             } else {
                 currentUser = data;
                 localStorage.setItem('user', JSON.stringify(data));
+                localStorage.removeItem('refId');
                 render();
             }
         }
