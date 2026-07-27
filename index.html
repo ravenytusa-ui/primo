@@ -352,7 +352,7 @@
                         <h3 class="font-extrabold text-xs text-amber-900 mb-2.5 flex items-center uppercase tracking-wider">
                             <i class="fa-solid fa-share-nodes mr-2 text-amber-600 text-sm"></i>Referral Link
                         </h3>
-                        <p class="text-[11px] text-amber-700 mb-3">Share your link with friends and earn $1.5 when their deposit gets approved.</p>
+                        <p class="text-[11px] text-amber-700 mb-3">Share your link with friends and earn $0.50 when their deposit gets approved.</p>
                         <div class="flex gap-2">
                             <input type="text" readonly id="ref-link" value="https://primo-max.vercel.app/?ref=${currentUser.ref_code || currentUser.id}" class="w-full p-3 bg-amber-50/40 border border-amber-200 rounded-2xl text-xs text-gray-600 font-mono">
                             <button onclick="copyRef()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 rounded-2xl text-xs font-bold transition shadow-md shrink-0"><i class="fa-solid fa-copy mr-1"></i> Copy</button>
@@ -437,11 +437,14 @@
                         </div>
                     </div>
 
-                    <!-- Commission box removed, grid-cols-2 used -->
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-3 gap-2.5">
                         <div class="bg-white p-3.5 rounded-2xl border border-amber-100 shadow-md text-center">
                             <p class="text-[10px] text-amber-700 font-extrabold uppercase">Team Size</p>
                             <p class="text-lg font-black text-amber-900 mt-0.5">${count}</p>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-2xl border border-amber-100 shadow-md text-center">
+                            <p class="text-[10px] text-amber-700 font-extrabold uppercase">Commission</p>
+                            <p class="text-lg font-black text-amber-900 mt-0.5">$0.00</p>
                         </div>
                         <div class="bg-white p-3.5 rounded-2xl border border-amber-100 shadow-md text-center">
                             <p class="text-[10px] text-amber-700 font-extrabold uppercase">Level</p>
@@ -449,39 +452,37 @@
                         </div>
                     </div>
 
-                    <!-- Updated Reward Boxes -->
-                    <div class="grid grid-cols-1 gap-3">
-                        <div class="bg-white p-4 rounded-3xl border border-amber-100 shadow-xl flex items-center justify-between transition hover:border-amber-300">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm shadow-inner"><i class="fa-solid fa-award"></i></div>
+                    <!-- Extra 3 Reward Boxes Added Below -->
+                    <div class="grid grid-cols-1 gap-2.5">
+                        <div class="bg-white p-3.5 rounded-2xl border border-amber-100 shadow-md flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-award"></i></div>
                                 <div>
-                                    <p class="text-xs font-black text-amber-900">Add 10 member for 3 dollar reward</p>
-                                    <p class="text-[11px] text-amber-600 font-semibold mt-0.5">Progress: ${count}/10</p>
+                                    <p class="text-xs font-black text-amber-900">Add 10 member for $5 dollar reward</p>
+                                    <p class="text-[10px] text-amber-600 font-medium">Progress: ${count}/10</p>
                                 </div>
                             </div>
-                            <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-sm">Reward</span>
+                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-xl">Reward</span>
                         </div>
-
-                        <div class="bg-white p-4 rounded-3xl border border-amber-100 shadow-xl flex items-center justify-between transition hover:border-amber-300">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm shadow-inner"><i class="fa-solid fa-gift"></i></div>
+                        <div class="bg-white p-3.5 rounded-2xl border border-amber-100 shadow-md flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-gift"></i></div>
                                 <div>
-                                    <p class="text-xs font-black text-amber-900">Add 20 users for 7 dollar reward</p>
-                                    <p class="text-[11px] text-amber-600 font-semibold mt-0.5">Progress: ${count}/20</p>
+                                    <p class="text-xs font-black text-amber-900">Add 20 users for $10 dollar reward</p>
+                                    <p class="text-[10px] text-amber-600 font-medium">Progress: ${count}/20</p>
                                 </div>
                             </div>
-                            <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-sm">Reward</span>
+                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-xl">Reward</span>
                         </div>
-
-                        <div class="bg-white p-4 rounded-3xl border border-amber-100 shadow-xl flex items-center justify-between transition hover:border-amber-300">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm shadow-inner"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="bg-white p-3.5 rounded-2xl border border-amber-100 shadow-md flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-trophy"></i></div>
                                 <div>
                                     <p class="text-xs font-black text-amber-900">Add 30 member for weekly salary</p>
-                                    <p class="text-[11px] text-amber-600 font-semibold mt-0.5">Progress: ${count}/30</p>
+                                    <p class="text-[10px] text-amber-600 font-medium">Progress: ${count}/30</p>
                                 </div>
                             </div>
-                            <span class="bg-amber-600 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-md">Salary</span>
+                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-xl">Salary</span>
                         </div>
                     </div>
 
