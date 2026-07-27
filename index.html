@@ -35,7 +35,6 @@
                 return;
             }
 
-            // Refresh user data from DB to check status updates (like Admin approval)
             const { data: freshUser } = await supabaseClient.from('users').select('*').eq('id', currentUser.id).single();
             if(freshUser) {
                 currentUser = freshUser;
@@ -59,7 +58,6 @@
             `;
         }
 
-        // --- AUTH SECTION ---
         function renderAuth(type) {
             let isLoginMode = (type === 'login');
             return `
@@ -72,23 +70,27 @@
                         <input type="password" id="retypepassword" placeholder="Retype Password" class="w-full p-3 mb-3 border rounded-xl">
                         <input type="text" id="phone" placeholder="Phone Number" class="w-full p-3 mb-3 border rounded-xl">
                         <button onclick="handleSignup()" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold mb-3">Sign Up</button>
-                        <p onclick="renderAuth('login')" class="text-center text-sm text-amber-700 cursor-pointer mt-2 underline font-semibold">Already have an account? Login</p>
+                        <p onclick="switchAuthMode('login')" class="text-center text-sm text-amber-700 cursor-pointer mt-2 underline font-semibold">Already have an account? Login</p>
                     ` : `
                         <button onclick="handleLogin()" class="w-full bg-amber-600 text-white p-3 rounded-xl font-bold mb-3">Login</button>
-                        <p onclick="renderAuth('signup')" class="text-center text-sm text-amber-700 cursor-pointer mt-2 underline font-semibold">Don't have an account? Sign Up</p>
+                        <p onclick="switchAuthMode('signup')" class="text-center text-sm text-amber-700 cursor-pointer mt-2 underline font-semibold">Don't have an account? Sign Up</p>
                     `}
                 </div>
             `;
         }
 
-        // --- DEPOSIT PAGE SECTION ---
+        function switchAuthMode(type) {
+            const app = document.getElementById('app');
+            app.innerHTML = renderAuth(type);
+        }
+
         function renderDepositPage() {
             return `
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200 mt-6">
                     <h2 class="text-xl font-bold text-amber-900 mb-2">Deposit via SadaPay</h2>
                     <p class="text-sm text-amber-700 mb-4 bg-amber-50 p-3 rounded-xl border border-amber-200">Fee: 520 Rs<br>Send payment to SadaPay Account: 0312-3456789</p>
                     <input type="text" id="tid" placeholder="Transaction ID" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
-                    <input type="text" id="holder" placeholder="Account Holder Name (Jis se payment ki gayi)" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
+                    <input type="text" id="holder" placeholder="Account Holder Name" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
                     <input type="text" id="sender" placeholder="Sender Account Number" oninput="checkDepositForm()" class="w-full p-3 mb-3 border rounded-xl">
                     <button onclick="submitDeposit()" id="dep-btn" disabled class="w-full bg-gray-300 text-white p-3 rounded-xl font-bold cursor-not-allowed">Proceed Payment</button>
                     <button onclick="logout()" class="w-full mt-3 bg-rose-100 text-rose-600 p-2 rounded-xl font-semibold">Logout / Exit</button>
@@ -128,7 +130,6 @@
             location.reload();
         }
 
-        // --- HOME / TASKS & REFERRAL SECTION ---
         function renderHome() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -190,7 +191,6 @@
             alert("Referral link copied!");
         }
 
-        // --- STATS & REWARDS SECTION ---
         async function renderStats() {
             const { data: teamMembers } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.id);
             const count = teamMembers ? teamMembers.length : 0;
@@ -220,7 +220,6 @@
             `;
         }
 
-        // --- WALLET SECTION ---
         function renderWallet() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -239,7 +238,6 @@
             `;
         }
 
-        // --- PROFILE SECTION ---
         function renderProfile() {
             return `
                 <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm mb-20">
@@ -263,7 +261,6 @@
             render();
         }
 
-        // --- BOTTOM NAVIGATION BAR ---
         function renderBottomNav() {
             return `
                 <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-50 bg-white border border-amber-200 rounded-2xl p-2 shadow-lg">
@@ -283,7 +280,6 @@
             render();
         }
 
-        // --- SIGNUP & LOGIN ACTIONS ---
         async function handleSignup() {
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
