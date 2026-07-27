@@ -243,6 +243,8 @@
                 }
             }
 
+            let totalBalance = Number(currentUser.balance || 0);
+
             return `
                 <div class="space-y-4 mb-24">
                     <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl flex items-center justify-between">
@@ -266,12 +268,12 @@
                             <span class="text-[11px] text-amber-100 uppercase font-extrabold tracking-wider"><i class="fa-solid fa-wallet mr-1.5"></i>Available Balance</span>
                             <span class="bg-white/20 px-2.5 py-1 rounded-xl text-[10px] font-bold text-amber-50 backdrop-blur-sm">Daily Reward Active</span>
                         </div>
-                        <h2 class="text-3xl font-black mb-4">$${Number(currentUser.balance || 0).toFixed(3)}</h2>
+                        <h2 class="text-3xl font-black mb-4">$${totalBalance.toFixed(3)}</h2>
                         
                         <div class="grid grid-cols-2 gap-2 pt-3 border-t border-white/20">
                             <div>
-                                <p class="text-[10px] text-amber-100 font-semibold">Today Earned</p>
-                                <p class="text-sm font-black text-white">+$${(tasksCompletedToday * 0.025).toFixed(3)}</p>
+                                <p class="text-[10px] text-amber-100 font-semibold">Total Earned (Today)</p>
+                                <p class="text-sm font-black text-white">+$${totalBalance.toFixed(3)}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] text-amber-100 font-semibold">Tasks Completed</p>
@@ -662,7 +664,6 @@
             const retype = document.getElementById('retypepassword').value;
             const phone = document.getElementById('phone').value;
             
-            // Get referral code stored in localStorage
             const referredBy = localStorage.getItem('refCode') || null;
             
             if(!name || !email || !password || !phone) {
