@@ -240,35 +240,92 @@
             }
 
             return `
-                <div class="bg-white rounded-3xl p-6 border border-amber-100 shadow-xl mb-24">
-                    <!-- Modern Balance Card matching Wallet style -->
-                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-5 rounded-2xl text-white shadow-lg shadow-amber-600/20 flex items-center justify-between mb-5">
-                        <div>
-                            <h2 class="text-3xl font-black">$${Number(currentUser.balance || 0).toFixed(3)}</h2>
-                            <p class="text-[11px] text-amber-100 uppercase font-extrabold tracking-wider mt-0.5"><i class="fa-solid fa-wallet mr-1.5"></i>Available Balance</p>
+                <div class="space-y-4 mb-24">
+                    <!-- Top Welcome & Status Bar -->
+                    <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg shadow-inner overflow-hidden">
+                                ${currentUser.avatar_url ? `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user"></i>`}
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-amber-900 text-sm">Welcome back, ${currentUser.name}!</h3>
+                                <p class="text-[11px] text-emerald-600 font-bold flex items-center mt-0.5"><span class="w-2 h-2 bg-emerald-500 rounded-full inline-block mr-1.5 animate-pulse"></span>Active Member</p>
+                            </div>
                         </div>
-                        <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-sm text-right">
-                            <span class="text-[10px] text-amber-100 font-bold block">Daily Reward</span>
-                            <span class="text-sm font-black text-white">Active</span>
+                        <button onclick="switchTab('profile')" class="w-10 h-10 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center transition shadow-sm">
+                            <i class="fa-solid fa-gear text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modern Balance Card -->
+                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-5 rounded-3xl text-white shadow-xl shadow-amber-600/20 relative overflow-hidden">
+                        <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[11px] text-amber-100 uppercase font-extrabold tracking-wider"><i class="fa-solid fa-wallet mr-1.5"></i>Available Balance</span>
+                            <span class="bg-white/20 px-2.5 py-1 rounded-xl text-[10px] font-bold text-amber-50 backdrop-blur-sm">Daily Reward Active</span>
+                        </div>
+                        <h2 class="text-3xl font-black mb-4">$${Number(currentUser.balance || 0).toFixed(3)}</h2>
+                        
+                        <div class="grid grid-cols-2 gap-2 pt-3 border-t border-white/20">
+                            <div>
+                                <p class="text-[10px] text-amber-100 font-semibold">Today Earned</p>
+                                <p class="text-sm font-black text-white">+$${(tasksCompletedToday * 0.025).toFixed(3)}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-amber-100 font-semibold">Tasks Completed</p>
+                                <p class="text-sm font-black text-white">${tasksCompletedToday}/3</p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <!-- Daily Earning Tasks Button / Dropdown -->
-                    <div class="mb-5">
+
+                    <!-- Quick Action Shortcuts -->
+                    <div class="grid grid-cols-4 gap-2.5">
+                        <button onclick="switchTab('wallet')" class="bg-white p-3 rounded-2xl border border-amber-100 shadow-md flex flex-col items-center justify-center hover:bg-amber-50 transition group">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-1.5 group-hover:scale-110 transition"><i class="fa-solid fa-money-bill-transfer text-sm"></i></div>
+                            <span class="text-[10px] font-extrabold text-amber-900">Withdraw</span>
+                        </button>
+                        <button onclick="switchTab('stats')" class="bg-white p-3 rounded-2xl border border-amber-100 shadow-md flex flex-col items-center justify-center hover:bg-amber-50 transition group">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-1.5 group-hover:scale-110 transition"><i class="fa-solid fa-users text-sm"></i></div>
+                            <span class="text-[10px] font-extrabold text-amber-900">My Team</span>
+                        </button>
+                        <button onclick="switchTab('profile')" class="bg-white p-3 rounded-2xl border border-amber-100 shadow-md flex flex-col items-center justify-center hover:bg-amber-50 transition group">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-1.5 group-hover:scale-110 transition"><i class="fa-solid fa-user-pen text-sm"></i></div>
+                            <span class="text-[10px] font-extrabold text-amber-900">Profile</span>
+                        </button>
+                        <button onclick="alert('Support: Contact admin via WhatsApp / Email for assistance.')" class="bg-white p-3 rounded-2xl border border-amber-100 shadow-md flex flex-col items-center justify-center hover:bg-amber-50 transition group">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-1.5 group-hover:scale-110 transition"><i class="fa-solid fa-headset text-sm"></i></div>
+                            <span class="text-[10px] font-extrabold text-amber-900">Support</span>
+                        </button>
+                    </div>
+
+                    <!-- Announcement Banner -->
+                    <div class="bg-gradient-to-r from-amber-100 to-amber-50 p-3.5 rounded-2xl border border-amber-200/70 flex items-center gap-3 shadow-sm">
+                        <div class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0"><i class="fa-solid fa-bullhorn text-xs"></i></div>
+                        <div class="text-xs text-amber-900">
+                            <p class="font-extrabold">Notice Board</p>
+                            <p class="text-[11px] text-amber-700">Complete daily tasks on time & invite friends to unlock $1.5 & $5 bonuses!</p>
+                        </div>
+                    </div>
+
+                    <!-- Daily Earning Tasks Dropdown/Card -->
+                    <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl">
                         ${!showTasksView ? `
                             <button onclick="toggleTasksView()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white p-4 rounded-2xl font-bold shadow-md transition flex items-center justify-between">
                                 <span class="flex items-center gap-2.5 text-xs uppercase tracking-wider font-extrabold">
                                     <i class="fa-solid fa-list-check text-base"></i> Daily Earning Tasks
                                 </span>
-                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-white/20 px-2 py-0.5 rounded-lg text-[10px]">${tasksCompletedToday}/3 Done</span>
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </div>
                             </button>
                         ` : `
-                            <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/80">
+                            <div>
                                 <div class="flex items-center justify-between mb-3">
                                     <h3 class="font-extrabold text-xs text-amber-900 flex items-center uppercase tracking-wide">
                                         <i class="fa-solid fa-list-check mr-2 text-amber-600 text-sm"></i>Daily Tasks (Earn $0.025)
                                     </h3>
-                                    <button onclick="toggleTasksView()" class="text-amber-800 hover:text-amber-900 text-xs font-bold bg-amber-200/60 px-2.5 py-1 rounded-xl">
+                                    <button onclick="toggleTasksView()" class="text-amber-800 hover:text-amber-900 text-xs font-bold bg-amber-100 px-2.5 py-1 rounded-xl">
                                         <i class="fa-solid fa-xmark mr-1"></i>Close
                                     </button>
                                 </div>
@@ -290,13 +347,14 @@
                     </div>
 
                     <!-- Referral Link Section -->
-                    <div class="p-4 bg-amber-50/50 rounded-2xl border border-amber-200/70">
-                        <h3 class="font-extrabold text-xs text-amber-900 mb-2 flex items-center uppercase tracking-wider">
+                    <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl">
+                        <h3 class="font-extrabold text-xs text-amber-900 mb-2.5 flex items-center uppercase tracking-wider">
                             <i class="fa-solid fa-share-nodes mr-2 text-amber-600 text-sm"></i>Referral Link
                         </h3>
+                        <p class="text-[11px] text-amber-700 mb-3">Share your link with friends and earn exciting referral rewards when they join.</p>
                         <div class="flex gap-2">
-                            <input type="text" readonly id="ref-link" value="https://primo-max.vercel.app/?ref=${currentUser.id}" class="w-full p-2.5 bg-white border border-amber-200 rounded-xl text-xs text-gray-600 font-mono">
-                            <button onclick="copyRef()" class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition shadow"><i class="fa-solid fa-copy"></i></button>
+                            <input type="text" readonly id="ref-link" value="https://primo-max.vercel.app/?ref=${currentUser.id}" class="w-full p-3 bg-amber-50/40 border border-amber-200 rounded-2xl text-xs text-gray-600 font-mono">
+                            <button onclick="copyRef()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 rounded-2xl text-xs font-bold transition shadow-md shrink-0"><i class="fa-solid fa-copy mr-1"></i> Copy</button>
                         </div>
                     </div>
                 </div>
@@ -310,11 +368,11 @@
 
         function renderTaskItem(id, url) {
             return `
-                <div class="flex items-center justify-between bg-white p-3 rounded-2xl border border-amber-100 text-xs gap-2 shadow-sm">
+                <div class="flex items-center justify-between bg-amber-50/40 p-3 rounded-2xl border border-amber-100 text-xs gap-2 shadow-sm">
                     <span class="font-bold text-amber-900 flex items-center"><i class="fa-solid fa-circle-dot text-amber-500 mr-1.5 text-[8px]"></i>Task ${id}</span>
-                    <button onclick="copyTaskUrl('${url}')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1.5 rounded-xl font-semibold transition"><i class="fa-solid fa-copy mr-1"></i>Copy</button>
-                    <input type="text" id="task-input-${id}" placeholder="Type done" class="w-20 p-1.5 bg-amber-50/30 border border-amber-200 rounded-xl text-xs text-center focus:outline-amber-600">
-                    <button onclick="completeTask(${id})" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-xl font-semibold transition shadow-sm"><i class="fa-solid fa-check mr-1"></i>Done</button>
+                    <button onclick="copyTaskUrl('${url}')" class="bg-amber-200/70 hover:bg-amber-200 text-amber-900 px-2.5 py-1.5 rounded-xl font-semibold transition"><i class="fa-solid fa-copy mr-1"></i>Copy</button>
+                    <input type="text" id="task-input-${id}" placeholder="Type done" class="w-20 p-1.5 bg-white border border-amber-200 rounded-xl text-xs text-center focus:outline-amber-600">
+                    <button onclick="completeTask(${id})" class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-xl font-semibold transition shadow-sm"><i class="fa-solid fa-check mr-1"></i>Done</button>
                 </div>
             `;
         }
