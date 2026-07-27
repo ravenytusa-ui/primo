@@ -3,820 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrimoMax - Earning Portal</title>
+    <title>Primo Max</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-amber-50/40 min-h-screen pb-28">
+<body class="bg-amber-50/30 text-amber-950 font-sans antialiased">
 
-    <div id="app" class="max-w-md mx-auto p-4"></div>
+    <!-- App Container -->
+    <div id="app" class="max-w-md mx-auto min-h-screen relative pb-20">
+        <!-- Main Content Area Rendered via JavaScript -->
+        <div id="main-content"></div>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 backdrop-blur-md border-t border-amber-100 px-6 py-3 flex justify-between items-center shadow-lg z-50">
+            <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-amber-600" data-tab="home">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] font-bold mt-1">Home</span>
+            </button>
+            <button onclick="switchTab('stats')" class="nav-btn flex flex-col items-center text-amber-600" data-tab="stats">
+                <i class="fa-solid fa-chart-pie text-lg"></i>
+                <span class="text-[10px] font-bold mt-1">Stats</span>
+            </button>
+            <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center text-amber-400" data-tab="wallet">
+                <i class="fa-solid fa-wallet text-lg"></i>
+                <span class="text-[10px] font-bold mt-1">Wallet</span>
+            </button>
+            <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center text-amber-400" data-tab="profile">
+                <i class="fa-solid fa-user text-lg"></i>
+                <span class="text-[10px] font-bold mt-1">Profile</span>
+            </button>
+            <button onclick="switchTab('exit')" class="nav-btn flex flex-col items-center text-red-500" data-tab="exit">
+                <i class="fa-solid fa-power-off text-lg"></i>
+                <span class="text-[10px] font-bold mt-1">Exit</span>
+            </button>
+        </nav>
+    </div>
 
     <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://itbcliczvrezshhkhdnj.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_obr15hgVa-8mF1S7qcaSdA_XXnYUAzV';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        let currentUser = JSON.parse(localStorage.getItem('user')) || null;
-        let currentTab = 'home';
-        let authMode = 'login';
-        let isWaitingForApproval = false;
-        let showTasksView = false;
-        let teamMembersCache = [];
+        // Dummy Cache Data for demonstration
+        let teamMembersCache = [
+            { name: "111", phone: "111", status: "Active" },
+            { name: "wewe", phone: "wewe", status: "Active" }
+        ];
         let withdrawalsCache = [];
-
-        // Capture referral code from URL immediately
-        const urlParams = new URLSearchParams(window.location.search);
-        const refCodeParam = urlParams.get('ref');
-        if(refCodeParam) {
-            localStorage.setItem('refCode', refCodeParam);
-        }
-
-        async function render() {
-            const app = document.getElementById('app');
-            
-            if (!currentUser) {
-                app.innerHTML = renderAuth();
-                return;
-            }
-
-            const { data: freshUser } = await supabaseClient.from('users').select('*').eq('id', currentUser.id).single();
-            if(freshUser) {
-                currentUser = freshUser;
-                localStorage.setItem('user', JSON.stringify(currentUser));
-            }
-
-            if (currentUser.status === 'pending' || isWaitingForApproval) {
-                app.innerHTML = renderWaitingPage();
-                return;
-            }
-
-            if (currentTab === 'stats') {
-                const { data } = await supabaseClient.from('users').select('*').eq('referred_by', currentUser.ref_code);
-                teamMembersCache = data || [];
-            } else if (currentTab === 'wallet') {
-                const { data } = await supabaseClient.from('withdrawals').select('*').eq('user_id', currentUser.id).order('id', { ascending: false });
-                withdrawalsCache = data || [];
-            }
-
-            let content = '';
-            if (currentTab === 'home') content = renderHome();
-            else if (currentTab === 'stats') content = renderStats();
-            else if (currentTab === 'wallet') content = renderWallet();
-            else if (currentTab === 'profile') content = renderProfile();
-
-            app.innerHTML = `
-                ${content}
-                ${renderBottomNav()}
-            `;
-        }
-
-        function renderAuth() {
-            let isLoginMode = (authMode === 'login');
-            let activeRef = localStorage.getItem('refCode');
-            
-            return `
-                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 mt-8">
-                    <div class="text-center mb-6">
-                        <div class="inline-flex items-center justify-center w-14 h-14 bg-amber-100 text-amber-700 rounded-full text-2xl mb-2 shadow-inner">
-                            <i class="fa-solid fa-crown"></i>
-                        </div>
-                        <h2 class="text-2xl font-extrabold text-amber-900 tracking-wide">PrimoMax Portal</h2>
-                        <p class="text-xs text-amber-600 font-medium">Earning & Investment Platform</p>
-                        ${activeRef && !isLoginMode ? `<span class="inline-block mt-2 bg-amber-100 text-amber-800 text-[10px] font-bold px-3 py-1 rounded-full">Referred by Code: ${activeRef}</span>` : ''}
-                    </div>
-
-                    ${!isLoginMode ? `
-                        <div class="relative mb-3.5">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-amber-500"><i class="fa-solid fa-user"></i></span>
-                            <input type="text" id="name" placeholder="Full Name" class="w-full pl-11 pr-4 py-3 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
-                        </div>
-                    ` : ''}
-                    
-                    <div class="relative mb-3.5">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-amber-500"><i class="fa-solid fa-envelope"></i></span>
-                        <input type="email" id="email" placeholder="Email Address" class="w-full pl-11 pr-4 py-3 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
-                    </div>
-
-                    <div class="relative mb-3.5">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-amber-500"><i class="fa-solid fa-lock"></i></span>
-                        <input type="password" id="password" placeholder="Password" class="w-full pl-11 pr-4 py-3 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
-                    </div>
-
-                    ${!isLoginMode ? `
-                        <div class="relative mb-3.5">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-amber-500"><i class="fa-solid fa-lock"></i></span>
-                            <input type="password" id="retypepassword" placeholder="Retype Password" class="w-full pl-11 pr-4 py-3 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
-                        </div>
-                        <div class="relative mb-4">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-amber-500"><i class="fa-solid fa-phone"></i></span>
-                            <input type="text" id="phone" placeholder="Phone Number" class="w-full pl-11 pr-4 py-3 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
-                        </div>
-                        <button onclick="handleSignup()" class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-user-plus"></i> Sign Up
-                        </button>
-                        <p onclick="switchAuthMode('login')" class="text-center text-xs text-amber-700 cursor-pointer mt-4 underline font-semibold hover:text-amber-900">Already have an account? Login</p>
-                    ` : `
-                        <button onclick="handleLogin()" class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-2 mb-4">
-                            <i class="fa-solid fa-right-to-bracket"></i> Login
-                        </button>
-                        <p onclick="switchAuthMode('signup')" class="text-center text-xs text-amber-700 cursor-pointer mt-2 underline font-semibold hover:text-amber-900">Don't have an account? Sign Up</p>
-                    `}
-                </div>
-            `;
-        }
-
-        function switchAuthMode(mode) {
-            authMode = mode;
-            render();
-        }
-
-        function renderWaitingPage() {
-            if (isWaitingForApproval) {
-                return `
-                    <div class="bg-white p-8 rounded-3xl shadow-xl border border-amber-100 mt-12 text-center">
-                        <div class="flex justify-center mb-4">
-                            <div class="animate-spin rounded-full h-12 w-12 border-4 border-amber-600 border-t-transparent"></div>
-                        </div>
-                        <h2 class="text-xl font-extrabold text-amber-900 mb-2">Payment Verification</h2>
-                        <p class="text-xs text-amber-700 mb-6 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-200/70">
-                            <i class="fa-regular fa-clock text-amber-600 mr-1"></i> Please wait for approval. <br><b class="text-amber-900 mt-1 inline-block">Wait for approve 15 to 25 min</b>.
-                        </p>
-                        <button onclick="checkApprovalStatus()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-2xl font-bold text-xs transition shadow-md flex items-center justify-center gap-2 mb-3">
-                            <i class="fa-solid fa-rotate"></i> Check Approval Status
-                        </button>
-                        <button onclick="logout()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 p-3.5 rounded-2xl font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout / Exit
-                        </button>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 mt-6 mb-12">
-                    <div class="text-center mb-4">
-                        <div class="inline-flex items-center justify-center w-12 h-12 bg-amber-100 text-amber-700 rounded-full text-xl mb-2 shadow-inner">
-                            <i class="fa-solid fa-wallet"></i>
-                        </div>
-                        <h2 class="text-xl font-extrabold text-amber-900">Deposit via SadaPay</h2>
-                        <p class="text-xs text-amber-700 mt-1">Please send <b>520 PKR</b> to the account details below:</p>
-                    </div>
-
-                    <div class="bg-amber-50/60 p-4 rounded-2xl border border-amber-200/80 mb-4 text-xs space-y-1.5 text-amber-900">
-                        <p><b>Account Name:</b> PrimoMax Official</p>
-                        <p><b>Account Number:</b> 03123456789</p>
-                        <p><b>Amount:</b> 520 PKR</p>
-                    </div>
-
-                    <div class="space-y-3 mb-4">
-                        <input type="text" id="trx-id" placeholder="Transaction ID / Trx ID" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        <input type="text" id="sender-acc" placeholder="Sender Account Number (e.g. 03XXXXXXXXX)" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        <input type="text" id="sender-name" placeholder="Sender Account Holder Name" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-
-                    <button onclick="submitDepositProof()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 mb-3">
-                        <i class="fa-solid fa-paper-plane"></i> Submit Payment Proof
-                    </button>
-
-                    <button onclick="logout()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 p-3 rounded-2xl font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout / Exit
-                    </button>
-                </div>
-            `;
-        }
-
-        async function checkApprovalStatus() {
-            const { data } = await supabaseClient.from('users').select('*').eq('id', currentUser.id).single();
-            if (data && data.status === 'approved') {
-                currentUser = data;
-                localStorage.setItem('user', JSON.stringify(currentUser));
-                isWaitingForApproval = false;
-                render();
-            } else {
-                alert('Your payment is still pending approval. Please wait.');
-            }
-        }
-
-        async function submitDepositProof() {
-            const trxId = document.getElementById('trx-id').value;
-            const senderAcc = document.getElementById('sender-acc').value;
-            const senderName = document.getElementById('sender-name').value;
-
-            if (!trxId || !senderAcc || !senderName) {
-                alert('Please fill all 3 boxes with your transaction details!');
-                return;
-            }
-
-            try {
-                await supabaseClient.from('deposits').insert([{
-                    user_id: currentUser.id,
-                    email: currentUser.email,
-                    trx_id: trxId,
-                    sender_account: senderAcc,
-                    sender_name: senderName,
-                    amount: '520 PKR',
-                    status: 'pending'
-                }]);
-            } catch(e) {
-                console.log(e);
-            }
-
-            alert('Payment proof submitted successfully! Please wait for approval.');
-            isWaitingForApproval = true;
-            render();
-        }
-
-        function renderHome() {
-            const lastTaskTime = localStorage.getItem(`last_task_time_${currentUser.id}`);
-            let tasksCompletedToday = Number(localStorage.getItem(`tasks_count_${currentUser.id}`) || 0);
-            let isResting = false;
-
-            if (lastTaskTime) {
-                const hoursPassed = (new Date().getTime() - Number(lastTaskTime)) / (1000 * 60 * 60);
-                if (hoursPassed >= 24) {
-                    tasksCompletedToday = 0;
-                    localStorage.setItem(`tasks_count_${currentUser.id}`, 0);
-                    localStorage.removeItem(`last_task_time_${currentUser.id}`);
-                } else if (tasksCompletedToday >= 3) {
-                    isResting = true;
-                }
-            }
-
-            let totalBalance = Number(currentUser.balance || 0);
-            let todayEarned = tasksCompletedToday * 0.025;
-
-            return `
-                <div class="space-y-4 mb-24">
-                    <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg shadow-inner overflow-hidden">
-                                ${currentUser.avatar_url ? `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user"></i>`}
-                            </div>
-                            <div>
-                                <h3 class="font-extrabold text-amber-900 text-sm">Welcome back, ${currentUser.name}!</h3>
-                                <p class="text-[11px] text-emerald-600 font-bold flex items-center mt-0.5"><span class="w-2 h-2 bg-emerald-500 rounded-full inline-block mr-1.5 animate-pulse"></span>Active Member</p>
-                            </div>
-                        </div>
-                        <button onclick="switchTab('profile')" class="w-10 h-10 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center transition shadow-sm">
-                            <i class="fa-solid fa-gear text-xs"></i>
-                        </button>
-                    </div>
-
-                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-5 rounded-3xl text-white shadow-xl shadow-amber-600/20 relative overflow-hidden">
-                        <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-[11px] text-amber-100 uppercase font-extrabold tracking-wider"><i class="fa-solid fa-wallet mr-1.5"></i>Available Balance</span>
-                            <span class="bg-white/20 px-2.5 py-1 rounded-xl text-[10px] font-bold text-amber-50 backdrop-blur-sm">Daily Reward Active</span>
-                        </div>
-                        <h2 class="text-3xl font-black mb-4">$${totalBalance.toFixed(3)}</h2>
-                        
-                        <div class="grid grid-cols-2 gap-2 pt-3 border-t border-white/20">
-                            <div>
-                                <p class="text-[10px] text-amber-100 font-semibold">Total Earned (Today)</p>
-                                <p class="text-sm font-black text-white">+$${todayEarned.toFixed(3)}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] text-amber-100 font-semibold">Tasks Completed</p>
-                                <p class="text-sm font-black text-white">${tasksCompletedToday}/3</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-4 gap-2.5">
-                        <button onclick="switchTab('wallet')" class="bg-white p-3 rounded-2xl border border-amber-100 shadow-md flex flex-col items-center justify-center hover:bg-amber-50 transition group">
-                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-1.5 group-hover:scale-110 transition"><i class="fa-solid fa-money-bill-transfer text-sm"></i></div>
-                            <span class="text-[10px] font-extrabold text-amber-900">Withdraw</span>
-                        </button>
-                        <button onclick="switchTab('stats')" class="bg-white p-3 rounded-2xl border border-amber-100 shadow-md flex flex-col items-center justify-center hover:bg-amber-50 transition group">
-                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-1.5 group-hover:scale-110 transition"><i class="fa-solid fa-users text-sm"></i></div>
-                            <span class="text-[10px] font-extrabold text-amber-900">My Team</span>
-                        </button>
-                        <button onclick="switchTab('profile')" class="bg-white p-3 rounded-2xl border border-amber-100 shadow-md flex flex-col items-center justify-center hover:bg-amber-50 transition group">
-                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-1.5 group-hover:scale-110 transition"><i class="fa-solid fa-user-pen text-sm"></i></div>
-                            <span class="text-[10px] font-extrabold text-amber-900">Profile</span>
-                        </button>
-                        <button onclick="alert('Support: Contact admin via WhatsApp / Email for assistance.')" class="bg-white p-3 rounded-2xl border border-amber-100 shadow-md flex flex-col items-center justify-center hover:bg-amber-50 transition group">
-                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-1.5 group-hover:scale-110 transition"><i class="fa-solid fa-headset text-sm"></i></div>
-                            <span class="text-[10px] font-extrabold text-amber-900">Support</span>
-                        </button>
-                    </div>
-
-                    <div class="bg-gradient-to-r from-amber-100 to-amber-50 p-3.5 rounded-2xl border border-amber-200/70 flex items-center gap-3 shadow-sm">
-                        <div class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0"><i class="fa-solid fa-bullhorn text-xs"></i></div>
-                        <div class="text-xs text-amber-900">
-                            <p class="font-extrabold">Notice Board</p>
-                            <p class="text-[11px] text-amber-700">Complete daily tasks on time & invite friends to unlock rewards!</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl">
-                        ${!showTasksView ? `
-                            <button onclick="toggleTasksView()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white p-4 rounded-2xl font-bold shadow-md transition flex items-center justify-between">
-                                <span class="flex items-center gap-2.5 text-xs uppercase tracking-wider font-extrabold">
-                                    <i class="fa-solid fa-list-check text-base"></i> Daily Earning Tasks
-                                </span>
-                                <div class="flex items-center gap-2">
-                                    <span class="bg-white/20 px-2 py-0.5 rounded-lg text-[10px]">${tasksCompletedToday}/3 Done</span>
-                                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                                </div>
-                            </button>
-                        ` : `
-                            <div>
-                                <div class="flex items-center justify-between mb-3">
-                                    <h3 class="font-extrabold text-xs text-amber-900 flex items-center uppercase tracking-wide">
-                                        <i class="fa-solid fa-list-check mr-2 text-amber-600 text-sm"></i>Daily Tasks (Earn $0.025)
-                                    </h3>
-                                    <button onclick="toggleTasksView()" class="text-amber-800 hover:text-amber-900 text-xs font-bold bg-amber-100 px-2.5 py-1 rounded-xl">
-                                        <i class="fa-solid fa-xmark mr-1"></i>Close
-                                    </button>
-                                </div>
-                                ${isResting ? `
-                                    <div class="bg-orange-50 border border-orange-200 text-orange-900 p-4 rounded-2xl text-center">
-                                        <i class="fa-regular fa-clock text-2xl mb-1 text-orange-600"></i>
-                                        <p class="font-bold text-xs">Limit Reached! (3/3 Tasks Completed)</p>
-                                        <p class="text-[11px] mt-1 text-orange-700">Please rest for 24 hours. New tasks will unlock tomorrow.</p>
-                                    </div>
-                                ` : `
-                                    <div class="space-y-2.5">
-                                        ${renderTaskItem(1, 'https://google.com')}
-                                        ${renderTaskItem(2, 'https://youtube.com')}
-                                        ${renderTaskItem(3, 'https://wikipedia.org')}
-                                    </div>
-                                `}
-                            </div>
-                        `}
-                    </div>
-
-                    <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl">
-                        <h3 class="font-extrabold text-xs text-amber-900 mb-2.5 flex items-center uppercase tracking-wider">
-                            <i class="fa-solid fa-share-nodes mr-2 text-amber-600 text-sm"></i>Referral Link
-                        </h3>
-                        <p class="text-[11px] text-amber-700 mb-3">Share your link with friends and earn $0.50 when their deposit gets approved.</p>
-                        <div class="flex gap-2">
-                            <input type="text" readonly id="ref-link" value="https://primo-max.vercel.app/?ref=${currentUser.ref_code || currentUser.id}" class="w-full p-3 bg-amber-50/40 border border-amber-200 rounded-2xl text-xs text-gray-600 font-mono">
-                            <button onclick="copyRef()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 rounded-2xl text-xs font-bold transition shadow-md shrink-0"><i class="fa-solid fa-copy mr-1"></i> Copy</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function toggleTasksView() {
-            showTasksView = !showTasksView;
-            render();
-        }
-
-        function renderTaskItem(id, url) {
-            return `
-                <div class="flex items-center justify-between bg-amber-50/40 p-3 rounded-2xl border border-amber-100 text-xs gap-2 shadow-sm">
-                    <span class="font-bold text-amber-900 flex items-center"><i class="fa-solid fa-circle-dot text-amber-500 mr-1.5 text-[8px]"></i>Task ${id}</span>
-                    <button onclick="copyTaskUrl('${url}')" class="bg-amber-200/70 hover:bg-amber-200 text-amber-900 px-2.5 py-1.5 rounded-xl font-semibold transition"><i class="fa-solid fa-copy mr-1"></i>Copy</button>
-                    <input type="text" id="task-input-${id}" placeholder="Type done" class="w-20 p-1.5 bg-white border border-amber-200 rounded-xl text-xs text-center focus:outline-amber-600">
-                    <button onclick="completeTask(${id})" class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-xl font-semibold transition shadow-sm"><i class="fa-solid fa-check mr-1"></i>Done</button>
-                </div>
-            `;
-        }
-
-        function copyTaskUrl(url) {
-            navigator.clipboard.writeText(url);
-            alert('Task link copied!');
-        }
-
-        async function completeTask(id) {
-            const val = document.getElementById(`task-input-${id}`).value;
-            if(!val) {
-                alert('Please type done or paste link!');
-                return;
-            }
-
-            let tasksCompletedToday = Number(localStorage.getItem(`tasks_count_${currentUser.id}`) || 0);
-            if (tasksCompletedToday >= 3) {
-                alert('You have already completed 3 tasks for today! Rest for 24 hours.');
-                render();
-                return;
-            }
-
-            tasksCompletedToday += 1;
-            localStorage.setItem(`tasks_count_${currentUser.id}`, tasksCompletedToday);
-            if (tasksCompletedToday === 1) {
-                localStorage.setItem(`last_task_time_${currentUser.id}`, new Date().getTime());
-            }
-
-            currentUser.balance = Number(currentUser.balance || 0) + 0.025;
-            await supabaseClient.from('users').update({ balance: currentUser.balance }).eq('id', currentUser.id);
-            localStorage.setItem('user', JSON.stringify(currentUser));
-            alert('Task completed! $0.025 added to balance.');
-            render();
-        }
 
         function copyRef() {
             const copyText = document.getElementById("ref-link");
-            navigator.clipboard.writeText(copyText.value);
-            alert("Referral link copied!");
+            if(copyText) {
+                navigator.clipboard.writeText(copyText.value);
+                alert("Referral link copied!");
+            }
         }
 
         function renderStats() {
             const count = teamMembersCache.length;
-            
+
             let membersListHtml = teamMembersCache.length > 0 ? 
-                teamMembersCache.map(m => `<div class="bg-amber-50/70 p-3 rounded-2xl border border-amber-200/60 mb-2 flex items-center justify-between text-xs shadow-sm"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-user-check"></i></div><div><p class="font-extrabold text-amber-900">${m.name}</p><p class="text-[10px] text-amber-600">${m.email}</p></div></div><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-xl">Active</span></div>`).join('') :
-                `<div class="text-center py-6 bg-amber-50/40 rounded-2xl border border-dashed border-amber-200"><i class="fa-solid fa-users-slash text-amber-400 text-2xl mb-2"></i><p class="text-xs text-amber-700 font-medium">No team members joined yet.</p><p class="text-[10px] text-amber-500 mt-0.5">Share your referral link to build your team!</p></div>`;
-
-            return `
-                <div class="space-y-4 mb-24">
-                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-5 rounded-3xl text-white shadow-xl shadow-amber-600/25 relative overflow-hidden">
-                        <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-[11px] text-amber-100 uppercase font-extrabold tracking-wider"><i class="fa-solid fa-users mr-1.5"></i>My Team Network</span>
-                            <span class="bg-white/20 px-2.5 py-1 rounded-xl text-[10px] font-bold text-amber-50 backdrop-blur-sm">Level 1</span>
-                        </div>
-                        <div class="flex items-baseline gap-2 mb-2">
-                            <h2 class="text-4xl font-black">${count}</h2>
-                            <p class="text-xs text-amber-100 font-semibold">Total Members Added</p>
-                        </div>
-                    </div>
-
-                   <div class="grid grid-cols-2 gap-2.5 mb-3">
-        <div class="bg-white p-3.5 rounded-2xl border border-amber-100 shadow-md text-center">
-            <p class="text-[10px] text-amber-700 font-extrabold uppercase">Team Size</p>
-            <p class="text-lg font-black text-amber-900 mt-0.5">${count}</p>
-        </div>
-        <div class="bg-white p-3.5 rounded-2xl border border-amber-100 shadow-md text-center">
-            <p class="text-[10px] text-amber-700 font-extrabold uppercase">Level</p>
-            <p class="text-lg font-black text-amber-900 mt-0.5">1</p>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 gap-3">
-        <div class="bg-white p-4 rounded-3xl border border-amber-100 shadow-xl flex items-center justify-between">
-            <div class="flex items-center gap-3.5">
-                <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm shadow-inner"><i class="fa-solid fa-award"></i></div>
-                <div>
-                    <p class="text-xs font-black text-amber-900">Add 10 member for 3 dollar reward</p>
-                    <p class="text-[11px] text-amber-600 font-semibold mt-0.5">Progress: ${count}/10</p>
-                </div>
-            </div>
-            <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-sm">Reward</span>
-        </div>
-
-        <div class="bg-white p-4 rounded-3xl border border-amber-100 shadow-xl flex items-center justify-between">
-            <div class="flex items-center gap-3.5">
-                <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm shadow-inner"><i class="fa-solid fa-gift"></i></div>
-                <div>
-                    <p class="text-xs font-black text-amber-900">Add 20 users for 7 dollar reward</p>
-                    <p class="text-[11px] text-amber-600 font-semibold mt-0.5">Progress: ${count}/20</p>
-                </div>
-            </div>
-            <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-sm">Reward</span>
-        </div>
-
-        <div class="bg-white p-4 rounded-3xl border border-amber-100 shadow-xl flex items-center justify-between">
-            <div class="flex items-center gap-3.5">
-                <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm shadow-inner"><i class="fa-solid fa-trophy"></i></div>
-                <div>
-                    <p class="text-xs font-black text-amber-900">Add 30 member for weekly salary</p>
-                    <p class="text-[11px] text-amber-600 font-semibold mt-0.5">Progress: ${count}/30</p>
-                </div>
-            </div>
-            <span class="bg-amber-600 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-md">Salary</span>
-        </div>
-    </div>
-
-                    <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl">
-                        <h3 class="font-extrabold text-xs text-amber-900 mb-3 uppercase tracking-wide flex items-center justify-between">
-                            <span class="flex items-center"><i class="fa-solid fa-list-ul mr-2 text-amber-600"></i>Team Members Directory</span>
-                            <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-lg text-[10px]">${count} Total</span>
-                        </h3>
-                        <div class="max-h-52 overflow-y-auto pr-1 space-y-1">${membersListHtml}</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderWallet() {
-            let historyHtml = withdrawalsCache.length > 0 ? 
-                withdrawalsCache.map(w => {
-                    let statusColor = w.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200';
-                    let statusText = w.status === 'approved' ? 'Approved' : 'Pending';
-                    return `
-                        <div class="bg-amber-50/50 p-3 rounded-2xl border border-amber-100 mb-2 flex items-center justify-between text-xs">
+                teamMembersCache.map(m => `
+                    <div class="bg-amber-50/50 p-3 rounded-2xl border border-amber-200/60 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
                             <div>
-                                <p class="font-black text-amber-900">$${Number(w.amount).toFixed(2)} (${w.method || 'SadaPay'})</p>
-                                <p class="text-[10px] text-amber-700 mt-0.5">Acc: ${w.account_number}</p>
+                                <p class="text-xs font-black text-amber-950">${m.name}</p>
+                                <p class="text-[10px] text-amber-600 font-semibold">${m.phone}</p>
                             </div>
-                            <span class="px-2.5 py-1 rounded-xl font-bold uppercase text-[10px] border ${statusColor}">${statusText}</span>
                         </div>
-                    `;
-                }).join('') :
-                `<p class="text-xs text-amber-700 italic text-center py-3">No withdrawal requests found.</p>`;
+                        <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">${m.status}</span>
+                    </div>
+                `).join('') : 
+                `<div class="text-center py-6 bg-amber-50/40 rounded-2xl border border-dashed border-amber-200"><i class="fa-solid fa-users-slash text-amber-400 text-2xl mb-1"></i><p class="text-xs text-amber-700 font-medium">No team members yet</p></div>`;
 
             return `
-                <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl mb-24">
-                    <h2 class="text-lg font-extrabold text-amber-900 mb-3 flex items-center"><i class="fa-solid fa-wallet text-amber-600 mr-2"></i>Withdrawal Wallet</h2>
+                <div class="space-y-5 pb-24 max-w-md mx-auto px-4 pt-4">
                     
-                    <div class="mb-4 bg-gradient-to-r from-amber-500 to-amber-600 p-4 rounded-2xl text-white shadow-lg shadow-amber-600/20 flex items-center justify-between">
-                        <div>
-                            <h2 class="text-3xl font-black">$${Number(currentUser.balance || 0).toFixed(3)}</h2>
-                            <p class="text-[11px] text-amber-100 uppercase font-bold tracking-wider mt-0.5"><i class="fa-solid fa-wallet mr-1"></i>Current Balance</p>
-                        </div>
-                        <div class="bg-white/20 p-3 rounded-2xl backdrop-blur-sm text-right">
-                            <p class="text-[10px] text-amber-100 font-bold">Minimum Withdraw</p>
-                            <p class="text-sm font-black text-white">$0.50</p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3 mb-4">
-                        <select id="withdraw-method" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
-                            <option>SadaPay</option>
-                            <option>EasyPaisa</option>
-                            <option>JazzCash</option>
-                            <option>U Paisa</option>
-                        </select>
-                        <input type="number" step="any" id="withdraw-amount" placeholder="Enter Amount to Withdraw ($)" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        <input type="text" id="acc-num" placeholder="Account Number" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        <input type="text" id="acc-name" placeholder="Account Holder Name" class="w-full p-3.5 bg-amber-50/30 border border-amber-200/80 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    
-                    <button onclick="handleWithdraw()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-3.5 rounded-2xl font-bold transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 mb-6">
-                        <i class="fa-solid fa-money-bill-transfer"></i> Withdraw
-                    </button>
-
-                    <div class="border-t border-amber-100 pt-4">
-                        <h3 class="font-extrabold text-xs text-amber-900 mb-3 uppercase tracking-wide flex items-center">
-                            <i class="fa-solid fa-clock-rotate-left mr-2 text-amber-600"></i>Withdrawal History & Status
-                        </h3>
-                        <div class="max-h-48 overflow-y-auto pr-1">
-                            ${historyHtml}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function handleWithdraw() {
-            const method = document.getElementById('withdraw-method').value;
-            const withdrawAmountInput = document.getElementById('withdraw-amount').value;
-            const accNum = document.getElementById('acc-num').value;
-            const accName = document.getElementById('acc-name').value;
-            const currentBalance = Number(currentUser.balance || 0);
-            const requestedAmount = Number(withdrawAmountInput);
-
-            if (!withdrawAmountInput || !accNum || !accName) {
-                alert('Please fill all withdrawal fields including amount!');
-                return;
-            }
-
-            if (requestedAmount < 0.50) {
-                alert('Minimum withdrawal amount is $0.50!');
-                return;
-            }
-
-            if (requestedAmount > currentBalance) {
-                alert('You do not have enough balance! Your current balance is $' + currentBalance.toFixed(3));
-                return;
-            }
-
-            try {
-                const { error: insertError } = await supabaseClient.from('withdrawals').insert([{
-                    user_id: currentUser.id,
-                    email: currentUser.email,
-                    method: method,
-                    account_number: accNum,
-                    account_holder: accName,
-                    amount: requestedAmount,
-                    status: 'pending'
-                }]);
-
-                if (insertError) {
-                    alert('Error: ' + insertError.message);
-                    return;
-                }
-
-                currentUser.balance = currentBalance - requestedAmount;
-                await supabaseClient.from('users').update({ balance: currentUser.balance }).eq('id', currentUser.id);
-
-                localStorage.setItem('user', JSON.stringify(currentUser));
-                alert('Withdrawal request submitted successfully!');
-                render();
-            } catch(e) {
-                alert('Error submitting withdrawal request.');
-            }
-        }
-
-        function renderProfile() {
-            let avatarContent = currentUser.avatar_url ? 
-                `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover">` : 
-                `<div class="w-full h-full bg-amber-100 flex items-center justify-center text-amber-700 text-2xl font-bold">Profile</div>`;
-
-            return `
-                <div class="max-w-md mx-auto mb-28 space-y-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <button onclick="switchTab('home')" class="w-10 h-10 rounded-2xl bg-white border border-amber-100 shadow-md flex items-center justify-center text-amber-900 hover:bg-amber-50 transition">
-                            <i class="fa-solid fa-arrow-left text-xs"></i>
-                        </button>
-                        <div class="text-center">
-                            <h2 class="text-base font-black text-amber-900">Edit Profile</h2>
-                            <p class="text-[10px] text-amber-600 font-semibold">Update your info</p>
-                        </div>
-                        <div class="w-10"></div>
-                    </div>
-
-                    <div class="text-center pt-2 pb-1 relative">
-                        <div class="relative inline-block">
-                            <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-amber-100 mx-auto relative">
-                                ${avatarContent}
+                    <!-- Top Hero Banner -->
+                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-6 text-white shadow-xl shadow-orange-500/20">
+                        <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="absolute -left-8 -bottom-8 w-32 h-32 bg-black/10 rounded-full blur-2xl pointer-events-none"></div>
+                        
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold uppercase tracking-wider">
+                                    <i class="fa-solid fa-users text-amber-200"></i> Team Network
+                                </span>
+                                <span class="px-3 py-1 rounded-full bg-black/20 backdrop-blur-md text-xs font-extrabold text-amber-100">
+                                    Level 1
+                                </span>
                             </div>
-                            <span class="absolute top-1 right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
-                            <label for="avatar-input" class="absolute bottom-0 right-0 w-8 h-8 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center shadow-md cursor-pointer transition">
-                                <i class="fa-solid fa-camera text-xs"></i>
-                            </label>
-                            <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
-                        </div>
-                        <h3 class="font-black text-amber-900 text-base mt-2">${currentUser.name}</h3>
-                        <p class="text-[10px] text-amber-600 font-bold mt-0.5"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full inline-block mr-1"></span>Since Jul 2026</p>
-                    </div>
-
-                    <div class="bg-white rounded-3xl p-5 border border-amber-100 shadow-xl space-y-3.5">
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-amber-800 uppercase tracking-wider mb-1.5">Full Name</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-500"><i class="fa-solid fa-user text-xs"></i></span>
-                                <input type="text" id="update-name" value="${currentUser.name}" class="w-full pl-10 pr-3.5 py-3 bg-amber-50/20 border border-amber-200/70 rounded-2xl text-xs font-semibold text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            
+                            <div class="flex items-baseline gap-2">
+                                <h2 class="text-4xl font-black tracking-tight">${count}</h2>
+                                <p class="text-xs font-semibold text-amber-100/90 uppercase tracking-wide">Total Members Added</p>
                             </div>
                         </div>
+                    </div>
 
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-amber-800 uppercase tracking-wider mb-1.5">Email</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-500"><i class="fa-solid fa-envelope text-xs"></i></span>
-                                <input type="email" disabled value="${currentUser.email}" class="w-full pl-10 pr-20 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-500 cursor-not-allowed">
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-800 text-[9px] font-black px-2 py-0.5 rounded-lg">SECURED</span>
+                    <!-- Quick Stats Grid (2 Columns) -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-amber-100/80 shadow-lg shadow-amber-500/5 text-center">
+                            <div class="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold">
+                                <i class="fa-solid fa-user-group"></i>
                             </div>
+                            <p class="text-[10px] text-amber-800/70 font-extrabold uppercase tracking-wider">Team Size</p>
+                            <p class="text-xl font-black text-amber-950 mt-0.5">${count}</p>
                         </div>
 
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-amber-800 uppercase tracking-wider mb-1.5">Phone</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-500"><i class="fa-solid fa-phone text-xs"></i></span>
-                                <input type="text" id="update-phone" value="${currentUser.phone || ''}" placeholder="03XXXXXXXXX" class="w-full pl-10 pr-3.5 py-3 bg-amber-50/20 border border-amber-200/70 rounded-2xl text-xs font-semibold text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        <div class="bg-white/80 backdrop-blur-xl p-4 rounded-2xl border border-amber-100/80 shadow-lg shadow-amber-500/5 text-center">
+                            <div class="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold">
+                                <i class="fa-solid fa-layer-group"></i>
                             </div>
+                            <p class="text-[10px] text-amber-800/70 font-extrabold uppercase tracking-wider">Current Level</p>
+                            <p class="text-xl font-black text-amber-950 mt-0.5">1</p>
                         </div>
+                    </div>
 
-                        <div class="pt-2">
-                            <label class="block text-[10px] font-extrabold text-amber-800 uppercase tracking-wider mb-2 flex items-center">
-                                <i class="fa-solid fa-shield-halved mr-1.5 text-amber-600"></i>Security
-                            </label>
-                            <div class="bg-amber-50/30 p-3.5 rounded-2xl border border-amber-200/70 space-y-2.5">
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-500"><i class="fa-solid fa-lock text-xs"></i></span>
-                                    <input type="password" id="current-password" placeholder="Current password" class="w-full pl-10 pr-10 py-2.5 bg-white border border-amber-200/80 rounded-xl text-xs font-medium text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 cursor-pointer"><i class="fa-regular fa-eye text-xs"></i></span>
+                    <!-- Milestone Goals / Rewards Section -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-black uppercase tracking-wider text-amber-900/60 px-1">Milestone Rewards</h3>
+                        
+                        <!-- Goal 1 -->
+                        <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 flex items-center justify-center font-bold text-base shadow-inner">
+                                    <i class="fa-solid fa-award"></i>
                                 </div>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-500"><i class="fa-solid fa-lock text-xs"></i></span>
-                                    <input type="password" id="new-password" placeholder="New password" class="w-full pl-10 pr-10 py-2.5 bg-white border border-amber-200/80 rounded-xl text-xs font-medium text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 cursor-pointer"><i class="fa-regular fa-eye text-xs"></i></span>
+                                <div>
+                                    <p class="text-xs font-black text-amber-950">Add 10 member for 3 dollar reward</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <div class="w-24 h-2 bg-amber-100 rounded-full overflow-hidden">
+                                            <div class="bg-amber-500 h-full rounded-full" style="width: ${Math.min((count/10)*100, 100)}%"></div>
+                                        </div>
+                                        <span class="text-[10px] text-amber-700 font-bold">Progress: ${count}/10</span>
+                                    </div>
                                 </div>
                             </div>
+                            <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-200/50">Reward</span>
                         </div>
 
-                        <button onclick="updateProfile()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white p-3.5 rounded-2xl font-extrabold text-xs transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 mt-3">
-                            <i class="fa-solid fa-floppy-disk"></i> Save
-                        </button>
+                        <!-- Goal 2 -->
+                        <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 flex items-center justify-center font-bold text-base shadow-inner">
+                                    <i class="fa-solid fa-gift"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-amber-950">Add 20 users for 7 dollar reward</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <div class="w-24 h-2 bg-amber-100 rounded-full overflow-hidden">
+                                            <div class="bg-amber-500 h-full rounded-full" style="width: ${Math.min((count/20)*100, 100)}%"></div>
+                                        </div>
+                                        <span class="text-[10px] text-amber-700 font-bold">Progress: ${count}/20</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-200/50">Reward</span>
+                        </div>
+
+                        <!-- Goal 3 -->
+                        <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-orange-500/20">
+                                    <i class="fa-solid fa-trophy"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-amber-950">Add 30 member for weekly salary</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <div class="w-24 h-2 bg-amber-100 rounded-full overflow-hidden">
+                                            <div class="bg-amber-600 h-full rounded-full" style="width: ${Math.min((count/30)*100, 100)}%"></div>
+                                        </div>
+                                        <span class="text-[10px] text-amber-700 font-bold">Progress: ${count}/30</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">Salary</span>
+                        </div>
                     </div>
-                </div>
-            `;
-        }
 
-        async function handleAvatarUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Image = e.target.result;
-                currentUser.avatar_url = base64Image;
-                await supabaseClient.from('users').update({ avatar_url: base64Image }).eq('id', currentUser.id);
-                localStorage.setItem('user', JSON.stringify(currentUser));
-                render();
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function updateProfile() {
-            const newName = document.getElementById('update-name').value;
-            const newPhone = document.getElementById('update-phone').value;
-            const currentPass = document.getElementById('current-password').value;
-            const newPass = document.getElementById('new-password').value;
-
-            let updateData = { name: newName, phone: newPhone };
-
-            if (newPass) {
-                if (currentPass !== currentUser.password) {
-                    alert('Current password is incorrect!');
-                    return;
-                }
-                updateData.password = newPass;
-                currentUser.password = newPass;
-            }
-
-            await supabaseClient.from('users').update(updateData).eq('id', currentUser.id);
-            currentUser.name = newName;
-            currentUser.phone = newPhone;
-            localStorage.setItem('user', JSON.stringify(currentUser));
-            alert('Profile updated successfully!');
-            render();
-        }
-
-        function renderBottomNav() {
-            return `
-                <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50 bg-white/95 backdrop-blur-md border border-amber-100 rounded-2xl p-2 shadow-2xl">
-                    <div class="flex justify-around items-center">
-                        <button onclick="switchTab('home')" class="flex flex-col items-center py-1 px-3 rounded-xl ${currentTab==='home'?'text-amber-600 font-bold bg-amber-50':'text-amber-700/60'} text-[11px] transition">
-                            <i class="fa-solid fa-house text-sm mb-1"></i>Home
-                        </button>
-                        <button onclick="switchTab('stats')" class="flex flex-col items-center py-1 px-3 rounded-xl ${currentTab==='stats'?'text-amber-600 font-bold bg-amber-50':'text-amber-700/60'} text-[11px] transition">
-                            <i class="fa-solid fa-chart-pie text-sm mb-1"></i>Stats
-                        </button>
-                        <button onclick="switchTab('wallet')" class="flex flex-col items-center py-1 px-3 rounded-xl ${currentTab==='wallet'?'text-amber-600 font-bold bg-amber-50':'text-amber-700/60'} text-[11px] transition">
-                            <i class="fa-solid fa-wallet text-sm mb-1"></i>Wallet
-                        </button>
-                        <button onclick="switchTab('profile')" class="flex flex-col items-center py-1 px-3 rounded-xl ${currentTab==='profile'?'text-amber-600 font-bold bg-amber-50':'text-amber-700/60'} text-[11px] transition">
-                            <i class="fa-solid fa-user text-sm mb-1"></i>Profile
-                        </button>
-                        <button onclick="logout()" class="flex flex-col items-center py-1 px-3 rounded-xl text-rose-500 text-[11px] font-semibold hover:bg-rose-50 transition">
-                            <i class="fa-solid fa-power-off text-sm mb-1"></i>Exit
-                        </button>
+                    <!-- Team Members Directory -->
+                    <div class="bg-white rounded-3xl p-5 border border-amber-100/80 shadow-lg shadow-amber-500/5">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-amber-50">
+                            <h3 class="text-xs font-black uppercase tracking-wider text-amber-900 flex items-center gap-2">
+                                <i class="fa-solid fa-list-ul text-amber-600"></i> Team Directory
+                            </h3>
+                            <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 text-[10px] font-black">${count} Total</span>
+                        </div>
+                        
+                        <div class="max-h-52 overflow-y-auto pr-1 space-y-2.5">
+                            ${membersListHtml}
+                        </div>
                     </div>
+
                 </div>
             `;
         }
 
         function switchTab(tab) {
-            currentTab = tab;
-            showTasksView = false;
-            render();
-        }
-
-        async function handleSignup() {
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const retype = document.getElementById('retypepassword').value;
-            const phone = document.getElementById('phone').value;
-            
-            const referredBy = localStorage.getItem('refCode') || null;
-            
-            if(!name || !email || !password || !phone) {
-                alert('Please fill all fields');
-                return;
-            }
-            if(password !== retype) {
-                alert('Passwords do not match!');
-                return;
-            }
-
-            const randomRefCode = Math.floor(10000 + Math.random() * 90000).toString();
-
-            const { data, error } = await supabaseClient.from('users').insert([{
-                name, email, password, phone, status: 'pending', balance: 0.00, ref_code: randomRefCode, referred_by: referredBy
-            }]).select().single();
-
-            if(error) {
-                alert('Error: ' + error.message);
+            const container = document.getElementById('main-content');
+            if (tab === 'stats') {
+                container.innerHTML = renderStats();
             } else {
-                currentUser = data;
-                localStorage.setItem('user', JSON.stringify(data));
-                localStorage.removeItem('refCode');
-                isWaitingForApproval = false;
-                render();
+                container.innerHTML = `<div class="p-8 text-center text-amber-800 font-bold">Welcome to ${tab.toUpperCase()} page</div>`;
             }
         }
 
-        async function handleLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            const { data, error } = await supabaseClient.from('users').select('*').eq('email', email).eq('password', password).single();
-            if(error || !data) {
-                alert('Invalid email or password');
-            } else {
-                currentUser = data;
-                localStorage.setItem('user', JSON.stringify(currentUser));
-                render();
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('user');
-            currentUser = null;
-            isWaitingForApproval = false;
-            showTasksView = false;
-            authMode = 'login';
-            render();
-        }
-
-        render();
+        // Default load stats view
+        window.onload = () => {
+            switchTab('stats');
+        };
     </script>
 </body>
 </html>
