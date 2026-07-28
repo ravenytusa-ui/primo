@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta+Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex justify-center items-center p-0 md:p-4">
@@ -65,7 +65,7 @@
     </div>
 
     <script>
-        // Data Cache
+        // Data Caches
         let teamMembersCache = [
             { name: "111", phone: "111", status: "Active" },
             { name: "wewe", phone: "wewe", status: "Active" },
@@ -77,8 +77,13 @@
             email: "sameerawanyt4u@gmail.com",
             phone: "03263079022",
             joinedDate: "Since Jul 2026",
-            avatar: null
+            avatar: null,
+            balance: 25.50
         };
+
+        let withdrawalsCache = [
+            { amount: "13.67", method: "JazzCash", accNum: "03489833451", status: "PENDING" }
+        ];
 
         function renderHome() {
             return `
@@ -198,18 +203,103 @@
         }
 
         function renderWallet() {
+            let historyHtml = withdrawalsCache.length > 0 ?
+                withdrawalsCache.map(w => `
+                    <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-black text-white">$${w.amount} <span class="text-amber-400">(${w.method})</span></p>
+                            <p class="text-[10px] text-slate-400 font-medium mt-0.5">Acc: ${w.accNum}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-wider">${w.status}</span>
+                    </div>
+                `).join('') :
+                `<p class="text-xs text-slate-500 text-center py-4">No withdrawal history</p>`;
+
             return `
                 <div class="p-6 space-y-6">
-                    <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl text-center space-y-2">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Available Balance</p>
-                        <h2 class="text-4xl font-black text-white">$0.00</h2>
+                    <!-- Balance Display Card -->
+                    <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl text-center space-y-1">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Available Balance</p>
+                        <h2 class="text-3xl font-black text-white">$${userProfile.balance.toFixed(2)}</h2>
                     </div>
-                    <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-3xl space-y-3">
-                        <h3 class="text-xs font-black uppercase text-slate-300 border-b border-slate-800 pb-2">Recent Transactions</h3>
-                        <p class="text-xs text-slate-500 text-center py-6">No transaction records found</p>
+
+                    <!-- Withdrawal Form Box -->
+                    <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-3xl space-y-4">
+                        <!-- Select Payment Method -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Payment Method</label>
+                            <select id="w-method" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition">
+                                <option value="SadaPay">SadaPay</option>
+                                <option value="JazzCash">JazzCash</option>
+                                <option value="EasyPaisa">EasyPaisa</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+
+                        <!-- Enter Amount -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Amount to Withdraw ($)</label>
+                            <input type="number" id="w-amount" placeholder="Enter Amount to Withdraw ($)" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 px-4 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                        </div>
+
+                        <!-- Account Number -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Account Number</label>
+                            <input type="text" id="w-acc" placeholder="Account Number" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 px-4 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                        </div>
+
+                        <!-- Account Holder Name -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Account Holder Name</label>
+                            <input type="text" id="w-name" placeholder="Account Holder Name" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 px-4 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                        </div>
+
+                        <!-- Withdraw Button -->
+                        <button onclick="handleWithdraw()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black py-3.5 rounded-2xl shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 hover:opacity-95 transition active:scale-[0.98] text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-money-bill-transfer"></i> Withdraw
+                        </button>
+                    </div>
+
+                    <!-- Withdrawal History & Status -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Withdrawal History & Status
+                        </div>
+                        <div class="space-y-2.5">
+                            ${historyHtml}
+                        </div>
                     </div>
                 </div>
             `;
+        }
+
+        function handleWithdraw() {
+            const method = document.getElementById('w-method').value;
+            const amount = parseFloat(document.getElementById('w-amount').value);
+            const accNum = document.getElementById('w-acc').value;
+            const accName = document.getElementById('w-name').value;
+
+            if(!amount || !accNum || !accName) {
+                alert("Please fill out all withdrawal fields!");
+                return;
+            }
+
+            if(amount > userProfile.balance) {
+                alert("Insufficient balance!");
+                return;
+            }
+
+            // Deduct balance and add to history
+            userProfile.balance -= amount;
+            withdrawalsCache.unshift({
+                amount: amount.toFixed(2),
+                method: method,
+                accNum: accNum,
+                status: "PENDING"
+            });
+
+            alert("Withdrawal request submitted successfully!");
+            switchTab('wallet');
         }
 
         function renderProfile() {
@@ -219,7 +309,6 @@
 
             return `
                 <div class="p-6 space-y-6">
-                    <!-- Top Title & Back -->
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <button onclick="switchTab('home')" class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-amber-400 transition">
@@ -232,15 +321,12 @@
                         </div>
                     </div>
 
-                    <!-- Avatar & Status -->
                     <div class="flex flex-col items-center justify-center pt-2">
                         <div class="relative">
                             <div id="avatar-container" class="w-24 h-24 rounded-full bg-amber-100 border-4 border-slate-800 flex items-center justify-center text-amber-900 font-bold text-xl shadow-xl overflow-hidden">
                                 ${avatarContent}
                             </div>
-                            <!-- Hidden File Input for Image Upload -->
                             <input type="file" id="dp-file-input" accept="image/*" class="hidden" onchange="handleDpUpload(event)">
-                            
                             <div onclick="document.getElementById('dp-file-input').click()" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center border-2 border-slate-900 shadow-md cursor-pointer hover:bg-amber-400 transition">
                                 <i class="fa-solid fa-camera text-xs"></i>
                             </div>
@@ -250,66 +336,22 @@
                         <p class="text-[11px] text-amber-400 font-semibold mt-0.5"><i class="fa-solid fa-circle text-[6px] mr-1"></i> ${userProfile.joinedDate}</p>
                     </div>
 
-                    <!-- Form Inputs -->
                     <div class="space-y-4 pt-2">
-                        <!-- Full Name -->
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Full Name</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                                    <i class="fa-solid fa-user text-xs"></i>
-                                </span>
-                                <input type="text" id="p-fullname" value="${userProfile.fullName}" class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition">
-                            </div>
+                            <input type="text" id="p-fullname" value="${userProfile.fullName}" class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition">
                         </div>
 
-                        <!-- Email -->
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Email</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                                    <i class="fa-solid fa-envelope text-xs"></i>
-                                </span>
-                                <input type="email" id="p-email" value="${userProfile.email}" class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3 pl-11 pr-24 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition" disabled>
-                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-black uppercase">Secured</span>
-                                </span>
-                            </div>
+                            <input type="email" id="p-email" value="${userProfile.email}" class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition" disabled>
                         </div>
 
-                        <!-- Phone -->
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Phone</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                                    <i class="fa-solid fa-phone text-xs"></i>
-                                </span>
-                                <input type="text" id="p-phone" value="${userProfile.phone}" class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition">
-                            </div>
+                            <input type="text" id="p-phone" value="${userProfile.phone}" class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition">
                         </div>
 
-                        <!-- Security Section Box -->
-                        <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl space-y-3">
-                            <div class="flex items-center gap-2 text-amber-400 text-xs font-black uppercase tracking-wider mb-1">
-                                <i class="fa-solid fa-shield-halved text-xs"></i> Security
-                            </div>
-                            
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                                    <i class="fa-solid fa-lock text-xs"></i>
-                                </span>
-                                <input type="password" id="p-curr-pass" placeholder="Current password" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 pl-11 pr-10 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
-                            </div>
-
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                                    <i class="fa-solid fa-lock text-xs"></i>
-                                </span>
-                                <input type="password" id="p-new-pass" placeholder="New password" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 pl-11 pr-10 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
-                            </div>
-                        </div>
-
-                        <!-- Save Button -->
                         <button onclick="saveProfileChanges()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black py-3.5 rounded-2xl shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 hover:opacity-95 transition active:scale-[0.98] text-xs uppercase tracking-wider">
                             <i class="fa-solid fa-floppy-disk"></i> Save
                         </button>
@@ -324,7 +366,6 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     userProfile.avatar = e.target.result;
-                    // Directly update UI preview without losing other inputs
                     const container = document.getElementById('avatar-container');
                     if (container) {
                         container.innerHTML = `<img src="${userProfile.avatar}" class="w-full h-full object-cover">`;
@@ -337,15 +378,12 @@
         function saveProfileChanges() {
             const nameInput = document.getElementById('p-fullname').value;
             const phoneInput = document.getElementById('p-phone').value;
-            
             if(!nameInput || !phoneInput) {
                 alert("Please fill out required fields!");
                 return;
             }
-
             userProfile.fullName = nameInput;
             userProfile.phone = phoneInput;
-
             alert("Profile updated successfully!");
             switchTab('profile');
         }
@@ -374,7 +412,7 @@
         }
 
         window.onload = () => {
-            switchTab('stats');
+            switchTab('wallet');
         };
     </script>
 </body>
