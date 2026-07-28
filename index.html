@@ -686,89 +686,84 @@
             `;
         }
 
-        async function handleWithdrawSubmit() {
-            const method = document.getElementById('w-method').value;
-            const amount = parseFloat(document.getElementById('w-amount').value);
-            const accNum = document.getElementById('w-acc').value;
-            const accName = document.getElementById('w-name').value;
-
-            if (!amount || !accNum || !accName) {
-                alert("Please fill all withdrawal fields!");
-                return;
-            }
-            if (amount < 0.50) {
-                alert("Minimum withdrawal is $0.50!");
-                return;
-            }
-            if (amount > currentUser.balance) {
-                alert("Insufficient balance!");
-                return;
-            }
-
-            const { error } = await supabaseClient
-                .from('withdrawals')
-                .insert([{
-                    user_email: currentUser.email,
-                    method: method,
-                    amount: amount,
-                    account_number: accNum,
-                    account_name: accName,
-                    status: 'PENDING'
-                }]);
-
-            if (error) {
-                alert("Error: " + error.message);
-                return;
-            }
-
-            const newBal = currentUser.balance - amount;
-            await supabaseClient
-                .from('users')
-                .update({ balance: newBal })
-                .eq('email', currentUser.email);
-
-            alert("Withdrawal request submitted successfully!");
-            renderDashboard('wallet');
-        }
-
-        // --- PROFILE TAB CONTENT ---
+        // --- PROFILE TAB CONTENT (MATCHING IMAGE 2) ---
         function getProfileTabContent() {
             return `
-                <div class="p-6 space-y-4">
-                    <div class="flex items-center gap-3 pb-2 border-b border-amber-100">
-                        <button onclick="renderDashboard('home')" class="w-9 h-9 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-center text-amber-700">
-                            <i class="fa-solid fa-arrow-left text-xs"></i>
-                        </button>
-                        <div>
-                            <h2 class="text-base font-black text-slate-900">Edit Profile</h2>
-                            <p class="text-[10px] text-slate-500 font-semibold">Update your account info</p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-center py-2">
-                        <div class="w-20 h-20 rounded-full bg-amber-200 border-4 border-amber-100 overflow-hidden flex items-center justify-center text-amber-800 text-xl font-bold shadow-inner">
+                <div class="p-6 space-y-5 pb-10">
+                    <!-- Top Avatar & Name Section -->
+                    <div class="flex flex-col items-center pt-2 relative">
+                        <div class="w-24 h-24 rounded-full bg-amber-200/80 border-4 border-amber-100 overflow-hidden flex items-center justify-center text-amber-800 text-2xl font-black shadow-inner relative">
                             ${currentUser.full_name.charAt(0)}
+                            <div class="absolute bottom-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] shadow">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </div>
                         </div>
-                        <h3 class="text-sm font-black text-slate-900 mt-2">${currentUser.full_name}</h3>
-                        <p class="text-[10px] text-amber-700 font-bold mt-0.5">Referral Code: ${currentUser.referral_code}</p>
+                        <h3 class="text-base font-black text-slate-900 mt-2">${currentUser.full_name}</h3>
+                        <p class="text-[11px] text-amber-700 font-bold mt-0.5 flex items-center gap-1">
+                            <i class="fa-solid fa-clock text-[10px]"></i> Since Jul 2026
+                        </p>
                     </div>
 
-                    <div class="bg-white border border-amber-200/60 p-5 rounded-3xl space-y-3 shadow-sm">
+                    <!-- Form Inputs Section -->
+                    <div class="space-y-4">
+                        <!-- Full Name -->
                         <div class="space-y-1">
                             <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Full Name</label>
-                            <input type="text" id="p-name" value="${currentUser.full_name}" class="w-full bg-amber-50/50 border border-amber-200 rounded-2xl py-3 px-3 text-xs font-bold text-slate-800 focus:outline-none">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Email (Cannot be changed)</label>
-                            <input type="email" disabled value="${currentUser.email}" class="w-full bg-slate-100 border border-slate-200 rounded-2xl py-3 px-3 text-xs font-bold text-slate-400">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Phone</label>
-                            <input type="text" id="p-phone" value="${currentUser.phone}" class="w-full bg-amber-50/50 border border-amber-200 rounded-2xl py-3 px-3 text-xs font-bold text-slate-800 focus:outline-none">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" id="p-name" value="${currentUser.full_name}" class="w-full bg-amber-50/40 border border-amber-200/70 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-slate-800 focus:outline-none focus:border-amber-500">
+                            </div>
                         </div>
 
-                        <button onclick="saveProfile()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black py-3.5 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:opacity-95 transition">
-                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save Changes
+                        <!-- Email -->
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Email</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-envelope"></i></span>
+                                <input type="email" value="${currentUser.email}" disabled class="w-full bg-amber-50/20 border border-amber-200/60 rounded-2xl py-3 pl-10 pr-20 text-xs font-bold text-slate-500">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <span class="bg-emerald-100 text-emerald-700 text-[9px] font-black px-2 py-0.5 rounded-md">SECURED</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Phone</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-phone"></i></span>
+                                <input type="text" id="p-phone" value="${currentUser.phone}" class="w-full bg-amber-50/40 border border-amber-200/70 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-slate-800 focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+
+                        <!-- Security Header -->
+                        <div class="pt-2">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-amber-700 flex items-center gap-1">
+                                <i class="fa-solid fa-shield-halved"></i> Security
+                            </p>
+                        </div>
+
+                        <!-- Current Password -->
+                        <div class="space-y-1">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="p-curr-pass" placeholder="Current password" class="w-full bg-amber-50/40 border border-amber-200/70 rounded-2xl py-3 pl-10 pr-10 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                                <span onclick="togglePassword('p-curr-pass', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-amber-600 text-xs cursor-pointer"><i class="fa-solid fa-eye"></i></span>
+                            </div>
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="space-y-1">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="p-new-pass" placeholder="New password" class="w-full bg-amber-50/40 border border-amber-200/70 rounded-2xl py-3 pl-10 pr-10 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                                <span onclick="togglePassword('p-new-pass', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-amber-600 text-xs cursor-pointer"><i class="fa-solid fa-eye"></i></span>
+                            </div>
+                        </div>
+
+                        <!-- Save Button -->
+                        <button onclick="saveProfile()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black py-3.5 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:opacity-95 transition mt-2">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save
                         </button>
                     </div>
                 </div>
@@ -778,10 +773,22 @@
         async function saveProfile() {
             const newName = document.getElementById('p-name').value;
             const newPhone = document.getElementById('p-phone').value;
+            const currPass = document.getElementById('p-curr-pass').value;
+            const newPass = document.getElementById('p-new-pass').value;
+
+            let updateData = { full_name: newName, phone: newPhone };
+
+            if (newPass) {
+                if (!currPass || currPass !== currentUser.password) {
+                    alert("Incorrect current password!");
+                    return;
+                }
+                updateData.password = newPass;
+            }
 
             const { error } = await supabaseClient
                 .from('users')
-                .update({ full_name: newName, phone: newPhone })
+                .update(updateData)
                 .eq('email', currentUser.email);
 
             if (error) {
@@ -791,6 +798,8 @@
 
             currentUser.full_name = newName;
             currentUser.phone = newPhone;
+            if (newPass) currentUser.password = newPass;
+            
             localStorage.setItem('primomax_user', JSON.stringify(currentUser));
             alert("Profile updated successfully!");
             renderDashboard('profile');
