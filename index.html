@@ -13,31 +13,52 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col items-center justify-start pb-28">
 
-    <!-- Main Dynamic Content Container -->
-    <div id="app-container" class="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-6 text-center my-4 mx-auto">
-        <!-- Content will be rendered dynamically by JavaScript -->
+    <!-- Main Container -->
+    <div class="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-6 text-center my-4 mx-auto">
+        
+        <!-- Header / Profile Info -->
+        <div class="space-y-1">
+            <h1 class="text-xl font-black text-slate-900">Dashboard</h1>
+            <p class="text-xs text-slate-500">Manage your daily tasks and earnings.</p>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-6 rounded-2xl shadow-md space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-wider opacity-90">Current Balance</p>
+            <h2 id="balance-display" class="text-3xl font-black">$0.00</h2>
+            <div class="flex justify-between text-xs pt-2 border-t border-white/20">
+                <span>Tasks Completed: <strong id="tasks-completed-display">0</strong>/3</span>
+                <span>Total Earned: <strong id="total-earned-display">$0.00</strong></span>
+            </div>
+        </div>
+
+        <!-- Action Button to Open Task -->
+        <button onclick="openTaskModal()" class="w-full bg-slate-900 text-white font-extrabold py-3.5 rounded-2xl text-xs uppercase tracking-wider shadow-lg hover:bg-slate-800 transition">
+            <i class="fa-solid fa-tasks mr-2"></i> View Available Task
+        </button>
+
     </div>
 
     <!-- Floating Fixed Bottom Navigation Bar -->
     <div class="fixed bottom-4 left-0 right-0 z-40 flex justify-center px-4">
         <div class="w-full max-w-md bg-white/90 backdrop-blur-md border border-amber-100 rounded-3xl shadow-xl py-3 px-6 flex justify-between items-center">
-            <button onclick="switchView('home')" id="nav-home" class="flex flex-col items-center text-amber-600 space-y-1">
+            <button onclick="renderDashboard('home')" class="flex flex-col items-center text-amber-600 space-y-1">
                 <i class="fa-solid fa-house text-base"></i>
                 <span class="text-[10px] font-bold">Home</span>
             </button>
-            <button onclick="switchView('stats')" id="nav-stats" class="flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1">
+            <button onclick="renderDashboard('stats')" class="flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1">
                 <i class="fa-solid fa-chart-pie text-base"></i>
                 <span class="text-[10px] font-semibold">Stats</span>
             </button>
-            <button onclick="switchView('wallet')" id="nav-wallet" class="flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1">
+            <button onclick="renderDashboard('wallet')" class="flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1">
                 <i class="fa-solid fa-wallet text-base"></i>
                 <span class="text-[10px] font-semibold">Wallet</span>
             </button>
-            <button onclick="switchView('profile')" id="nav-profile" class="flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1">
+            <button onclick="renderDashboard('profile')" class="flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1">
                 <i class="fa-solid fa-user text-base"></i>
                 <span class="text-[10px] font-semibold">Profile</span>
             </button>
-            <button onclick="switchView('exit')" id="nav-exit" class="flex flex-col items-center text-rose-400 hover:text-rose-600 transition space-y-1">
+            <button onclick="renderDashboard('exit')" class="flex flex-col items-center text-rose-400 hover:text-rose-600 transition space-y-1">
                 <i class="fa-solid fa-power-off text-base"></i>
                 <span class="text-[10px] font-semibold">Exit</span>
             </button>
@@ -46,192 +67,32 @@
 
     <!-- Script Section -->
     <script>
-        // Supabase Initialization Placeholder
+        // Placeholder initialization for Supabase client and user context
         const SUPABASE_URL = 'YOUR_SUPABASE_URL';
         const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // User Context
+        // Mock current user object for local session tracking
         let currentUser = JSON.parse(localStorage.getItem('primomax_user')) || {
             email: 'user@example.com',
-            balance: 2.00,
+            balance: 0.00,
             total_earned: 0.00,
             tasks_completed: 0
         };
 
-        // Sample Withdrawal History Data
-        let withdrawalsHistory = [
-            { id: 1, amount: 1.00, method: "SadaPay", account: "2222", status: "approved" },
-            { id: 2, amount: 0.50, method: "JazzCash", account: "03001234567", status: "pending" }
-        ];
+        // Render initial values to the DOM
+        function updateDashboardUI() {
+            document.getElementById('balance-display').innerText = `$${parseFloat(currentUser.balance).toFixed(2)}`;
+            document.getElementById('tasks-completed-display').innerText = currentUser.tasks_completed;
+            document.getElementById('total-earned-display').innerText = `$${parseFloat(currentUser.total_earned).toFixed(2)}`;
+        }
+        updateDashboardUI();
 
-        let currentView = 'home';
+        function renderDashboard(view) {
+            updateDashboardUI();
+        }
+
         let currentGeneratedLink = "";
-
-        // Status Badge Generator with Color Logic
-        function renderStatusBadge(status) {
-            const statusLower = (status || '').toLowerCase();
-            if (statusLower === 'approved') {
-                return `<span class="px-3 py-1 bg-emerald-100 text-emerald-700 font-extrabold rounded-full text-[11px] border border-emerald-200 capitalize">Approved</span>`;
-            } else if (statusLower === 'pending') {
-                return `<span class="px-3 py-1 bg-amber-100 text-amber-700 font-extrabold rounded-full text-[11px] border border-amber-200 capitalize">Pending</span>`;
-            } else {
-                return `<span class="px-3 py-1 bg-rose-100 text-rose-700 font-extrabold rounded-full text-[11px] border border-rose-200 capitalize">${status}</span>`;
-            }
-        }
-
-        function switchView(viewName) {
-            currentView = viewName;
-            
-            // Update Active Nav Styles
-            ['home', 'stats', 'wallet', 'profile', 'exit'].forEach(v => {
-                const navBtn = document.getElementById(`nav-${v}`);
-                if (navBtn) {
-                    if (v === viewName) {
-                        navBtn.className = "flex flex-col items-center text-amber-600 space-y-1";
-                    } else {
-                        navBtn.className = "flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1";
-                    }
-                }
-            });
-
-            renderApp();
-        }
-
-        function renderApp() {
-            const container = document.getElementById('app-container');
-
-            if (currentView === 'wallet') {
-                // WALLET VIEW
-                let historyHtml = withdrawalsHistory.map(item => `
-                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-3 rounded-2xl">
-                        <div class="text-left">
-                            <p class="text-xs font-black text-slate-900">$${item.amount.toFixed(2)} <span class="text-amber-600">(${item.method})</span></p>
-                            <p class="text-[10px] text-slate-400 font-medium">Acc: ${item.account}</p>
-                        </div>
-                        <div>
-                            ${renderStatusBadge(item.status)}
-                        </div>
-                    </div>
-                `).join('');
-
-                container.innerHTML = `
-                    <div class="space-y-4">
-                        <!-- Balance -->
-                        <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-6 rounded-2xl shadow-md space-y-1">
-                            <p class="text-xs font-semibold uppercase tracking-wider opacity-90">Available Balance</p>
-                            <h2 class="text-3xl font-black">$${parseFloat(currentUser.balance).toFixed(2)}</h2>
-                        </div>
-
-                        <!-- Withdrawal Form -->
-                        <div class="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 text-left space-y-3">
-                            <div>
-                                <label class="text-[10px] font-bold uppercase text-slate-500">Payment Method</label>
-                                <select id="withdraw-method" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 outline-none mt-1">
-                                    <option value="SadaPay">SadaPay</option>
-                                    <option value="Nayapay">NayaPay</option>
-                                    <option value="JazzCash">JazzCash</option>
-                                    <option value="EasyPaisa">EasyPaisa</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <div class="flex justify-between text-[10px] font-bold text-slate-500">
-                                    <label class="uppercase">Amount to Withdraw ($)</label>
-                                    <span class="text-amber-600">MIN: $0.50</span>
-                                </div>
-                                <input type="number" id="withdraw-amount" placeholder="Enter Amount ($)" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 outline-none mt-1">
-                            </div>
-
-                            <div>
-                                <label class="text-[10px] font-bold uppercase text-slate-500">Account Number</label>
-                                <input type="text" id="withdraw-account" placeholder="Account Number" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 outline-none mt-1">
-                            </div>
-
-                            <div>
-                                <label class="text-[10px] font-bold uppercase text-slate-500">Account Holder Name</label>
-                                <input type="text" id="withdraw-name" placeholder="Account Holder Name" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 outline-none mt-1">
-                            </div>
-
-                            <button onclick="submitWithdrawal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:opacity-95 transition mt-2">
-                                <i class="fa-solid fa-wallet mr-1"></i> Withdraw
-                            </button>
-                        </div>
-
-                        <!-- Withdrawal History & Status -->
-                        <div class="text-left space-y-2 pt-2">
-                            <h3 class="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                                <i class="fa-solid fa-rotate-left text-amber-500"></i> Withdrawal History & Status
-                            </h3>
-                            <div class="space-y-2">
-                                ${historyHtml || '<p class="text-xs text-slate-400">No withdrawal history yet.</p>'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                // HOME VIEW
-                container.innerHTML = `
-                    <div class="space-y-1">
-                        <h1 class="text-xl font-black text-slate-900">Dashboard</h1>
-                        <p class="text-xs text-slate-500">Manage your daily tasks and earnings.</p>
-                    </div>
-
-                    <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-6 rounded-2xl shadow-md space-y-2">
-                        <p class="text-xs font-semibold uppercase tracking-wider opacity-90">Current Balance</p>
-                        <h2 class="text-3xl font-black">$${parseFloat(currentUser.balance).toFixed(2)}</h2>
-                        <div class="flex justify-between text-xs pt-2 border-t border-white/20">
-                            <span>Tasks Completed: <strong>${currentUser.tasks_completed}</strong>/3</span>
-                            <span>Total Earned: <strong>$${parseFloat(currentUser.total_earned).toFixed(2)}</strong></span>
-                        </div>
-                    </div>
-
-                    <button onclick="openTaskModal()" class="w-full bg-slate-900 text-white font-extrabold py-3.5 rounded-2xl text-xs uppercase tracking-wider shadow-lg hover:bg-slate-800 transition">
-                        <i class="fa-solid fa-tasks mr-2"></i> View Available Task
-                    </button>
-                `;
-            }
-        }
-
-        async function submitWithdrawal() {
-            const amountInput = document.getElementById('withdraw-amount');
-            const accountInput = document.getElementById('withdraw-account');
-            const methodInput = document.getElementById('withdraw-method');
-
-            const amount = parseFloat(amountInput.value);
-            const account = accountInput.value.trim();
-            const method = methodInput.value;
-
-            if (isNaN(amount) || amount < 0.50) {
-                alert("Minimum withdrawal amount is $0.50");
-                return;
-            }
-
-            if (amount > currentUser.balance) {
-                alert("Insufficient balance!");
-                return;
-            }
-
-            if (!account) {
-                alert("Please enter your account number!");
-                return;
-            }
-
-            // Deduct balance and record new pending withdrawal
-            currentUser.balance -= amount;
-            localStorage.setItem('primomax_user', JSON.stringify(currentUser));
-
-            withdrawalsHistory.unshift({
-                id: Date.now(),
-                amount: amount,
-                method: method,
-                account: account,
-                status: 'pending' // Default status is pending
-            });
-
-            alert("Withdrawal request submitted successfully!");
-            renderApp();
-        }
 
         function openTaskModal() {
             if (currentUser.tasks_completed >= 3) {
@@ -252,6 +113,7 @@
                             <p class="text-xs text-slate-500 mt-1">Copy the link below, paste it into the box, and click Done to earn $0.05.</p>
                         </div>
 
+                        <!-- Random Link Box with Copy Button -->
                         <div class="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-2xl p-2">
                             <input type="text" id="task-link-input" readonly value="${currentGeneratedLink}" class="w-full bg-transparent text-xs text-slate-700 px-2 outline-none truncate">
                             <button onclick="copyTaskLink()" class="bg-amber-500 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-600 transition whitespace-nowrap">
@@ -259,6 +121,7 @@
                             </button>
                         </div>
 
+                        <!-- Paste Input Box -->
                         <div>
                             <input type="text" id="user-paste-input" placeholder="Paste link here..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-700 p-3 outline-none focus:border-amber-500 transition">
                         </div>
@@ -281,7 +144,7 @@
         function copyTaskLink() {
             const linkInput = document.getElementById('task-link-input');
             linkInput.select();
-            linkInput.setSelectionRange(0, 99999);
+            linkInput.setSelectionRange(0, 99999); // For mobile devices
             navigator.clipboard.writeText(linkInput.value);
             alert("Link copied to clipboard!");
         }
@@ -299,14 +162,31 @@
                 return;
             }
 
-            currentUser.tasks_completed += 1;
-            currentUser.balance = parseFloat(currentUser.balance) + 0.05;
-            currentUser.total_earned = parseFloat(currentUser.total_earned) + 0.05;
+            const newTasksCompleted = currentUser.tasks_completed + 1;
+            const newBalance = parseFloat(currentUser.balance) + 0.05;
+            const newTotalEarned = parseFloat(currentUser.total_earned) + 0.05;
 
+            const { error } = await supabaseClient
+                .from('users')
+                .update({
+                    tasks_completed: newTasksCompleted,
+                    balance: newBalance,
+                    total_earned: newTotalEarned
+                })
+                .eq('email', currentUser.email);
+
+            if (error) {
+                alert("Error updating task status: " + error.message);
+                return;
+            }
+
+            currentUser.tasks_completed = newTasksCompleted;
+            currentUser.balance = newBalance;
+            currentUser.total_earned = newTotalEarned;
             localStorage.setItem('primomax_user', JSON.stringify(currentUser));
 
             closeTaskModal();
-            renderApp();
+            renderDashboard('home');
             alert("Task completed successfully! $0.05 added to your balance.");
         }
 
@@ -316,9 +196,6 @@
                 modal.parentElement.remove();
             }
         }
-
-        // Initialize App
-        renderApp();
     </script>
 </body>
 </html>
