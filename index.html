@@ -3,93 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Project</title>
-    <!-- Tailwind CSS CDN -->
+    <title>PrimoMax Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase CDN -->
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fcfbf7; color: #3d2c1e; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col items-center justify-start pb-28">
+<body class="min-h-screen flex justify-center items-center p-0 md:p-4">
 
-    <!-- Main Container -->
-    <div class="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-xl space-y-6 text-center my-4 mx-auto">
-        
-        <!-- Header / Profile Info -->
-        <div class="space-y-1">
-            <h1 class="text-xl font-black text-slate-900">Dashboard</h1>
-            <p class="text-xs text-slate-500">Manage your daily tasks and earnings.</p>
-        </div>
-
-        <!-- Balance Card -->
-        <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-6 rounded-2xl shadow-md space-y-2">
-            <p class="text-xs font-semibold uppercase tracking-wider opacity-90">Current Balance</p>
-            <h2 id="balance-display" class="text-3xl font-black">$0.00</h2>
-            <div class="flex justify-between text-xs pt-2 border-t border-white/20">
-                <span>Tasks Completed: <strong id="tasks-completed-display">0</strong>/3</span>
-                <span>Total Earned: <strong id="total-earned-display">$0.00</strong></span>
-            </div>
-        </div>
-
-        <!-- Action Button to Open Task -->
-        <button onclick="openTaskModal()" class="w-full bg-slate-900 text-white font-extrabold py-3.5 rounded-2xl text-xs uppercase tracking-wider shadow-lg hover:bg-slate-800 transition">
-            <i class="fa-solid fa-tasks mr-2"></i> View Available Task
-        </button>
-
+    <!-- App Wrapper -->
+    <div id="app" class="w-full max-w-md bg-white md:rounded-3xl md:border md:border-amber-100 shadow-2xl min-h-screen md:min-h-[850px] relative flex flex-col overflow-hidden">
+        <!-- Dynamic Content Injected Here -->
     </div>
 
-    <!-- Floating Fixed Bottom Navigation Bar -->
-    <div class="fixed bottom-4 left-0 right-0 z-40 flex justify-center px-4">
-        <div class="w-full max-w-md bg-white/90 backdrop-blur-md border border-amber-100 rounded-3xl shadow-xl py-3 px-6 flex justify-between items-center">
-            <button onclick="renderDashboard('home')" class="flex flex-col items-center text-amber-600 space-y-1">
-                <i class="fa-solid fa-house text-base"></i>
-                <span class="text-[10px] font-bold">Home</span>
-            </button>
-            <button onclick="renderDashboard('stats')" class="flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1">
-                <i class="fa-solid fa-chart-pie text-base"></i>
-                <span class="text-[10px] font-semibold">Stats</span>
-            </button>
-            <button onclick="renderDashboard('wallet')" class="flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1">
-                <i class="fa-solid fa-wallet text-base"></i>
-                <span class="text-[10px] font-semibold">Wallet</span>
-            </button>
-            <button onclick="renderDashboard('profile')" class="flex flex-col items-center text-slate-400 hover:text-amber-600 transition space-y-1">
-                <i class="fa-solid fa-user text-base"></i>
-                <span class="text-[10px] font-semibold">Profile</span>
-            </button>
-            <button onclick="renderDashboard('exit')" class="flex flex-col items-center text-rose-400 hover:text-rose-600 transition space-y-1">
-                <i class="fa-solid fa-power-off text-base"></i>
-                <span class="text-[10px] font-semibold">Exit</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Script Section -->
     <script>
-        // Placeholder initialization for Supabase client and user context
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // --- SUPABASE CONFIGURATION ---
+        const SUPABASE_URL = 'https://itbcliczvrezshhkhdnj.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_obr15hgVa-8mF1S7qcaSdA_XXnYUAzV';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Mock current user object for local session tracking
-        let currentUser = JSON.parse(localStorage.getItem('primomax_user')) || {
-            email: 'user@example.com',
-            balance: 0.00,
-            total_earned: 0.00,
-            tasks_completed: 0
-        };
+        // State Management
+        let currentUser = JSON.parse(localStorage.getItem('primomax_user')) || null;
+        let currentView = 'login';
 
-        // Render initial values to the DOM
-        function updateDashboardUI() {
-            document.getElementById('balance-display').innerText = `$${parseFloat(currentUser.balance).toFixed(2)}`;
-            document.getElementById('tasks-completed-display').innerText = currentUser.tasks_completed;
-            document.getElementById('total-earned-display').innerText = `$${parseFloat(currentUser.total_earned).toFixed(2)}`;
+        // Check initial state
+        async function initApp() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            if (refCode && !currentUser) {
+                localStorage.setItem('primomax_ref', refCode);
+            }
+
+            if (!currentUser) {
+                renderLogin();
+            } else {
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('email', currentUser.email)
+                    .single();
+
+                if (data) {
+                    currentUser = data;
+                    localStorage.setItem('primomax_user', JSON.stringify(currentUser));
+                    
+                    if (currentUser.status === 'approved') {
+                        renderDashboard('home');
+                    } else {
+                        renderWaiting();
+                    }
+                } else {
+                    renderLogin();
+                }
+            }
         }
-        updateDashboardUI();
 
-        function renderDashboard(view) {
-            updateDashboardUI();
+        // --- 1. LOGIN VIEW ---
+        function renderLogin() {
+            currentView = 'login';
+            const html = `
+                <div class="flex-1 flex flex-col justify-center items-center p-6">
+                    <div class="w-full max-w-sm bg-white border border-amber-100 rounded-3xl p-8 shadow-sm space-y-6 text-center">
+                        <div class="w-16 h-16 bg-amber-100 text-amber-700 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-inner">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-black text-slate-900">PrimoMax Portal</h1>
+                            <p class="text-xs text-amber-700 font-semibold mt-1">Earning & Investment Platform</p>
+                        </div>
+                        
+                        <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-envelope"></i></span>
+                                <input type="email" id="login-email" placeholder="Email Address" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3.5 pl-10 pr-4 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="login-password" placeholder="Password" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3.5 pl-10 pr-4 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-3.5 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:opacity-95 transition">
+                                <i class="fa-solid fa-right-to-bracket mr-1"></i> Login
+                            </button>
+                        </form>
+
+                        <p class="text-xs text-slate-500 font-medium">
+                            Don't have an account? <button onclick="renderSignup()" class="text-amber-600 font-bold hover:underline">Sign Up</button>
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = html;
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('email', email)
+                .eq('password', password)
+                .single();
+
+            if (error || !data) {
+                alert("Invalid email or password!");
+                return;
+            }
+
+            currentUser = data;
+            localStorage.setItem('primomax_user', JSON.stringify(currentUser));
+
+            if (currentUser.status === 'approved') {
+                renderDashboard('home');
+            } else {
+                renderWaiting();
+            }
+        }
+
+        // --- 2. SIGNUP VIEW ---
+        function renderSignup() {
+            currentView = 'signup';
+            const refCode = localStorage.getItem('primomax_ref') || 'None';
+            const html = `
+                <div class="flex-1 flex flex-col justify-center items-center p-6 overflow-y-auto">
+                    <div class="w-full max-w-sm bg-white border border-amber-100 rounded-3xl p-6 shadow-sm space-y-4 text-center my-auto">
+                        <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl mx-auto flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-black text-slate-900">PrimoMax Portal</h1>
+                            <p class="text-[11px] text-amber-700 font-semibold">Earning & Investment Platform</p>
+                            ${refCode !== 'None' ? `<span class="inline-block mt-1 px-3 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full">Referred by Code: ${refCode}</span>` : ''}
+                        </div>
+                        
+                        <form onsubmit="handleSignup(event)" class="space-y-3 text-left">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" id="su-name" placeholder="Full Name" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-envelope"></i></span>
+                                <input type="email" id="su-email" placeholder="Email Address" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="su-pass" placeholder="Password" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3 pl-10 pr-10 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                                <span onclick="togglePassword('su-pass', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-amber-600 text-xs cursor-pointer"><i class="fa-solid fa-eye"></i></span>
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="su-repass" placeholder="Retype Password" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3 pl-10 pr-10 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                                <span onclick="togglePassword('su-repass', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-amber-600 text-xs cursor-pointer"><i class="fa-solid fa-eye"></i></span>
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-phone"></i></span>
+                                <input type="text" id="su-phone" placeholder="Phone Number (03XXXXXXXXX)" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-3 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:opacity-95 transition">
+                                <i class="fa-solid fa-user-plus mr-1"></i> Sign Up
+                            </button>
+                        </form>
+
+                        <p class="text-xs text-slate-500 font-medium">
+                            Already have an account? <button onclick="renderLogin()" class="text-amber-600 font-bold hover:underline">Login</button>
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = html;
+        }
+
+        function togglePassword(fieldId, iconElem) {
+            const field = document.getElementById(fieldId);
+            if (field.type === "password") {
+                field.type = "text";
+                iconElem.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            } else {
+                field.type = "password";
+                iconElem.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('su-name').value;
+            const email = document.getElementById('su-email').value;
+            const password = document.getElementById('su-pass').value;
+            const repassword = document.getElementById('su-repass').value;
+            const phone = document.getElementById('su-phone').value;
+
+            if (password !== repassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            const refCode = Math.floor(1000 + Math.random() * 9000).toString();
+            const referredBy = localStorage.getItem('primomax_ref') || null;
+
+            const { data, error } = await supabaseClient
+                .from('users')
+                .insert([{
+                    full_name: fullName,
+                    email: email,
+                    password: password,
+                    phone: phone,
+                    referral_code: refCode,
+                    referred_by: referredBy,
+                    balance: 0.00,
+                    status: 'pending'
+                }])
+                .select()
+                .single();
+
+            if (error) {
+                alert("Signup failed: " + error.message);
+                return;
+            }
+
+            if (referredBy) {
+                const { data: refUser } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('referral_code', referredBy)
+                    .single();
+
+                if (refUser) {
+                    await supabaseClient
+                        .from('users')
+                        .update({ 
+                            balance: parseFloat(refUser.balance) + 0.50,
+                            total_earned: parseFloat(refUser.total_earned) + 0.50 
+                        })
+                        .eq('referral_code', referredBy);
+                }
+            }
+
+            currentUser = data;
+            localStorage.setItem('primomax_user', JSON.stringify(currentUser));
+            localStorage.removeItem('primomax_ref');
+            renderDeposit();
+        }
+
+        // --- 3. DEPOSIT VIEW ---
+        function renderDeposit() {
+            currentView = 'deposit';
+            const html = `
+                <div class="flex-1 flex flex-col justify-center items-center p-6 overflow-y-auto">
+                    <div class="w-full max-w-sm bg-white border border-amber-100 rounded-3xl p-6 shadow-sm space-y-4 my-auto">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl mx-auto flex items-center justify-center text-xl mb-2">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <h2 class="text-base font-black text-slate-900">Deposit via SadaPay</h2>
+                            <p class="text-[11px] text-amber-700 font-semibold mt-0.5">Please send 520 PKR to the account details below:</p>
+                        </div>
+
+                        <div class="bg-amber-50/50 border border-amber-200/60 rounded-2xl p-3.5 text-xs space-y-1">
+                            <p class="font-bold text-slate-800">Account Name: <span class="font-normal text-slate-600">PrimoMax Official</span></p>
+                            <p class="font-bold text-slate-800">Account Number: <span class="font-normal text-slate-600">03123456789</span></p>
+                            <p class="font-bold text-slate-800">Amount: <span class="font-normal text-amber-700">520 PKR</span></p>
+                        </div>
+
+                        <form onsubmit="handleDepositSubmit(event)" class="space-y-3">
+                            <input type="text" id="dep-trx" placeholder="Transaction ID / Trx ID" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3 px-4 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                            <input type="text" id="dep-phone" placeholder="Sender Account Number (03XXXXXXXXX)" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3 px-4 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                            <input type="text" id="dep-name" placeholder="Sender Account Holder Name" required class="w-full bg-amber-50/40 border border-amber-200/60 rounded-2xl py-3 px-4 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                            
+                            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-3.5 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:opacity-95 transition">
+                                <i class="fa-solid fa-paper-plane mr-1"></i> Submit Payment Proof
+                            </button>
+                        </form>
+
+                        <button onclick="logout()" class="w-full bg-rose-50 text-rose-600 font-extrabold py-3 rounded-2xl text-xs uppercase tracking-wider hover:bg-rose-100 transition">
+                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout / Exit
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = html;
+        }
+
+        async function handleDepositSubmit(e) {
+            e.preventDefault();
+            const trxId = document.getElementById('dep-trx').value;
+            const phone = document.getElementById('dep-phone').value;
+            const name = document.getElementById('dep-name').value;
+
+            const { error } = await supabaseClient
+                .from('deposits')
+                .insert([{
+                    user_email: currentUser.email,
+                    gateway: 'SadaPay',
+                    trx_id: trxId,
+                    sender_phone: phone,
+                    sender_name: name,
+                    status: 'pending'
+                }]);
+
+            if (error) {
+                alert("Error submitting deposit: " + error.message);
+                return;
+            }
+
+            renderWaiting();
+        }
+
+        // --- 4. WAITING FOR APPROVAL VIEW ---
+        function renderWaiting() {
+            currentView = 'waiting';
+            const html = `
+                <div class="flex-1 flex flex-col justify-center items-center p-6 text-center">
+                    <div class="w-full max-w-sm bg-white border border-amber-100 rounded-3xl p-8 shadow-sm space-y-6">
+                        <div class="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <div>
+                            <h2 class="text-lg font-black text-slate-900">Payment Verification</h2>
+                            <div class="mt-3 bg-amber-50 border border-amber-200/60 rounded-2xl p-3.5 text-amber-800 text-xs font-semibold">
+                                <i class="fa-solid fa-clock mr-1"></i> Please wait for approval.<br>Wait for approve 15 to 25 min.
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="checkApprovalStatus()" class="w-full bg-emerald-600 text-white font-extrabold py-3.5 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:bg-emerald-700 transition cursor-pointer relative z-50">
+                            <i class="fa-solid fa-rotate mr-1"></i> Check Approval Status
+                        </button>
+
+                        <button type="button" onclick="logout()" class="w-full bg-rose-50 text-rose-600 font-extrabold py-3 rounded-2xl text-xs uppercase tracking-wider hover:bg-rose-100 transition cursor-pointer relative z-50">
+                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout / Exit
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app').innerHTML = html;
+        }
+
+        async function checkApprovalStatus() {
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('email', currentUser.email)
+                .single();
+
+            if (data) {
+                currentUser = data;
+                localStorage.setItem('primomax_user', JSON.stringify(currentUser));
+                if (currentUser.status === 'approved') {
+                    renderDashboard('home');
+                } else {
+                    alert("Your account is still pending approval by admin.");
+                }
+            } else {
+                alert("Error checking status. Please try again.");
+            }
+        }
+
+        // --- 5. MAIN DASHBOARD WITH BOTTOM NAV ---
+        async function renderDashboard(tab) {
+            const { data } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('email', currentUser.email)
+                .single();
+            if (data) currentUser = data;
+
+            let contentHtml = '';
+            if (tab === 'home') contentHtml = await getHomeTabContent();
+            else if (tab === 'stats') contentHtml = await getStatsTabContent();
+            else if (tab === 'wallet') contentHtml = await getWalletTabContent();
+            else if (tab === 'profile') contentHtml = getProfileTabContent();
+
+            const html = `
+                <div class="flex-1 overflow-y-auto pb-24">
+                    ${contentHtml}
+                </div>
+                <!-- Bottom Navigation -->
+                <nav class="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-amber-100 px-4 py-3 flex justify-around items-center z-50">
+                    <button onclick="renderDashboard('home')" class="flex flex-col items-center gap-1 ${tab === 'home' ? 'text-amber-600' : 'text-slate-400'}">
+                        <i class="fa-solid fa-house text-sm"></i>
+                        <span class="text-[10px] font-bold">Home</span>
+                    </button>
+                    <button onclick="renderDashboard('stats')" class="flex flex-col items-center gap-1 ${tab === 'stats' ? 'text-amber-600' : 'text-slate-400'}">
+                        <i class="fa-solid fa-chart-pie text-sm"></i>
+                        <span class="text-[10px] font-bold">Stats</span>
+                    </button>
+                    <button onclick="renderDashboard('wallet')" class="flex flex-col items-center gap-1 ${tab === 'wallet' ? 'text-amber-600' : 'text-slate-400'}">
+                        <i class="fa-solid fa-wallet text-sm"></i>
+                        <span class="text-[10px] font-bold">Wallet</span>
+                    </button>
+                    <button onclick="renderDashboard('profile')" class="flex flex-col items-center gap-1 ${tab === 'profile' ? 'text-amber-600' : 'text-slate-400'}">
+                        <i class="fa-solid fa-user text-sm"></i>
+                        <span class="text-[10px] font-bold">Profile</span>
+                    </button>
+                    <button onclick="logout()" class="flex flex-col items-center gap-1 text-rose-500">
+                        <i class="fa-solid fa-power-off text-sm"></i>
+                        <span class="text-[10px] font-bold">Exit</span>
+                    </button>
+                </nav>
+            `;
+            document.getElementById('app').innerHTML = html;
+        }
+
+        // --- HOME TAB CONTENT ---
+        async function getHomeTabContent() {
+            const { count } = await supabaseClient
+                .from('users')
+                .select('*', { count: 'exact', head: true })
+                .eq('referred_by', currentUser.referral_code);
+
+            const refLink = `${window.location.origin}${window.location.pathname}?ref=${currentUser.referral_code}`;
+
+            const avatarHtml = currentUser.avatar_url 
+                ? `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover">` 
+                : currentUser.full_name.charAt(0);
+
+            return `
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center justify-between bg-amber-50/50 border border-amber-100 p-3 rounded-2xl">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-full bg-amber-200 overflow-hidden flex items-center justify-center font-bold text-amber-800">
+                                ${avatarHtml}
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-black text-slate-900">Welcome back, ${currentUser.full_name}!</h3>
+                                <p class="text-[10px] text-emerald-600 font-bold"><i class="fa-solid fa-circle text-[6px]"></i> Active Member</p>
+                            </div>
+                        </div>
+                        <button onclick="renderDashboard('profile')" class="w-9 h-9 bg-white border border-amber-200 rounded-xl flex items-center justify-center text-amber-700 shadow-sm">
+                            <i class="fa-solid fa-gear text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 p-6 rounded-3xl text-white shadow-md relative overflow-hidden space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full"><i class="fa-solid fa-wallet mr-1"></i> Available Balance</span>
+                            <span class="text-[10px] font-black bg-white/20 px-2.5 py-1 rounded-full">Daily Reward Active</span>
+                        </div>
+                        <h2 class="text-3xl font-black">$${parseFloat(currentUser.balance).toFixed(3)}</h2>
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/20 text-xs">
+                            <div>
+                                <p class="text-[10px] opacity-80 uppercase font-bold">Total Earned</p>
+                                <p class="font-black mt-0.5">+$${parseFloat(currentUser.total_earned).toFixed(3)}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] opacity-80 uppercase font-bold">Tasks Completed</p>
+                                <p class="font-black mt-0.5">${currentUser.tasks_completed}/3</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2 text-center">
+                        <button onclick="renderDashboard('wallet')" class="bg-amber-50/60 border border-amber-200/60 p-3 rounded-2xl flex flex-col items-center gap-1.5 hover:bg-amber-100/50 transition">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-money-bill-transfer"></i></div>
+                            <span class="text-[11px] font-bold text-slate-800">Withdraw</span>
+                        </button>
+                        <button onclick="renderDashboard('stats')" class="bg-amber-50/60 border border-amber-200/60 p-3 rounded-2xl flex flex-col items-center gap-1.5 hover:bg-amber-100/50 transition">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-users"></i></div>
+                            <span class="text-[11px] font-bold text-slate-800">My Team</span>
+                        </button>
+                        <button onclick="renderDashboard('profile')" class="bg-amber-50/60 border border-amber-200/60 p-3 rounded-2xl flex flex-col items-center gap-1.5 hover:bg-amber-100/50 transition">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-user-pen"></i></div>
+                            <span class="text-[11px] font-bold text-slate-800">Profile</span>
+                        </button>
+                        <button onclick="alert('Support: Contact admin via WhatsApp or Telegram for assistance.')" class="bg-amber-50/60 border border-amber-200/60 p-3 rounded-2xl flex flex-col items-center gap-1.5 hover:bg-amber-100/50 transition">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-headset"></i></div>
+                            <span class="text-[11px] font-bold text-slate-800">Support</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-amber-50/80 border border-amber-200/60 p-4 rounded-2xl flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5 text-xs"><i class="fa-solid fa-bullhorn"></i></div>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-900">Notice Board</h4>
+                            <p class="text-[11px] text-slate-600 mt-0.5">Complete daily tasks on time & invite friends to unlock rewards and weekly salary!</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-amber-600 to-orange-600 p-4 rounded-2xl text-white flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-sm"><i class="fa-solid fa-list-check"></i></div>
+                            <div>
+                                <h4 class="text-xs font-black uppercase tracking-wider">Daily Earning Tasks</h4>
+                                <p class="text-[10px] opacity-90 font-medium">${currentUser.tasks_completed}/3 Done</p>
+                            </div>
+                        </div>
+                        <button onclick="openTaskModal()" class="px-3.5 py-1.5 bg-white text-amber-700 text-xs font-black rounded-xl shadow hover:bg-amber-50 transition">Complete</button>
+                    </div>
+
+                    <div class="bg-white border border-amber-200/60 p-4 rounded-2xl space-y-2 shadow-sm">
+                        <h4 class="text-xs font-black text-slate-900 flex items-center gap-1.5"><i class="fa-solid fa-share-nodes text-amber-600"></i> Referral Link</h4>
+                        <p class="text-[10px] text-slate-500">Share your link with friends and earn $0.50 when they deposit approved.</p>
+                        <div class="flex gap-2">
+                            <input type="text" readonly value="${refLink}" class="w-full bg-amber-50/50 border border-amber-200 rounded-xl px-3 py-2 text-[11px] font-bold text-slate-700 focus:outline-none">
+                            <button onclick="navigator.clipboard.writeText('${refLink}'); alert('Referral link copied!');" class="px-4 bg-amber-500 text-white font-extrabold text-xs rounded-xl shadow hover:bg-amber-600 transition"><i class="fa-solid fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function openTaskModal() {
@@ -101,77 +514,345 @@
             const randomTaskLink = "https://example.com/task/" + Math.random().toString(36).substring(7);
             const modalHtml = `
                 <div id="task-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-center items-center p-4">
-                    <div class="bg-white border border-amber-100 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-xl text-center max-h-[90vh] overflow-y-auto">
-                        <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl mx-auto flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-list-check"></i>
+                    <div class="bg-white w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl text-center">
+                        <h3 class="text-sm font-black text-slate-900">Complete Task #${currentUser.tasks_completed + 1}</h3>
+                        <p class="text-[11px] text-slate-500">Copy the task link below, visit it, and paste confirmation code to finish.</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="task-url-box" readonly value="${randomTaskLink}" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-[10px] font-bold text-slate-700">
+                            <button onclick="navigator.clipboard.writeText('${randomTaskLink}'); alert('Task link copied!');" class="px-3 bg-amber-500 text-white text-xs font-bold rounded-xl"><i class="fa-solid fa-copy"></i></button>
                         </div>
-                        <div>
-                            <h3 class="text-base font-black text-slate-900">Task Available</h3>
-                            <p class="text-xs text-slate-500 mt-1">Click the link below to visit the task page, stay for 30 seconds, and then complete it.</p>
+                        <input type="text" id="task-proof-input" placeholder="Paste verification text here" class="w-full bg-amber-50/50 border border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none">
+                        <div class="flex gap-2">
+                            <button onclick="submitTask()" class="flex-1 bg-amber-500 text-white font-black py-2.5 rounded-xl text-xs uppercase shadow">Done</button>
+                            <button onclick="document.getElementById('task-modal').remove()" class="px-4 bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Cancel</button>
                         </div>
-                        <a href="${randomTaskLink}" target="_blank" onclick="enableTaskCompleteButton()" class="block w-full bg-amber-50 border border-amber-200 text-amber-800 font-bold py-3 rounded-2xl text-xs hover:bg-amber-100 transition truncate px-4">
-                            <i class="fa-solid fa-external-link-alt mr-1"></i> Open Task Link
-                        </a>
-                        <button id="complete-task-btn" onclick="submitTaskCompletion()" disabled class="w-full bg-slate-300 text-slate-600 font-extrabold py-3 rounded-2xl text-xs uppercase tracking-wider cursor-not-allowed transition">
-                            Verify & Claim Reward ($1.5)
-                        </button>
-                        <button onclick="closeTaskModal()" class="w-full bg-rose-50 text-rose-600 font-extrabold py-2.5 rounded-2xl text-xs uppercase tracking-wider hover:bg-rose-100 transition">
-                            Cancel
-                        </button>
                     </div>
                 </div>
             `;
-            const div = document.createElement('div');
-            div.innerHTML = modalHtml;
-            document.body.appendChild(div);
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
-        function enableTaskCompleteButton() {
-            const btn = document.getElementById('complete-task-btn');
-            if (btn) {
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.classList.remove('bg-slate-300', 'text-slate-600', 'cursor-not-allowed');
-                    btn.classList.add('bg-gradient-to-r', 'from-amber-500', 'to-orange-500', 'text-white', 'shadow-md', 'hover:opacity-95');
-                }, 3000);
+        async function submitTask() {
+            const proof = document.getElementById('task-proof-input').value;
+            if (!proof) {
+                alert("Please paste verification code / text!");
+                return;
             }
-        }
 
-        async function submitTaskCompletion() {
-            const newTasksCompleted = currentUser.tasks_completed + 1;
-            const newBalance = parseFloat(currentUser.balance) + 1.5;
-            const newTotalEarned = parseFloat(currentUser.total_earned) + 1.5;
+            const newCompleted = currentUser.tasks_completed + 1;
+            const taskReward = 1.5; 
+            const newBalance = parseFloat(currentUser.balance) + taskReward;
+            const newTotalEarned = parseFloat(currentUser.total_earned) + taskReward;
 
             const { error } = await supabaseClient
                 .from('users')
-                .update({
-                    tasks_completed: newTasksCompleted,
+                .update({ 
+                    tasks_completed: newCompleted,
                     balance: newBalance,
                     total_earned: newTotalEarned
                 })
                 .eq('email', currentUser.email);
 
             if (error) {
-                alert("Error updating task status: " + error.message);
+                alert("Error updating task: " + error.message);
                 return;
             }
 
-            currentUser.tasks_completed = newTasksCompleted;
-            currentUser.balance = newBalance;
-            currentUser.total_earned = newTotalEarned;
-            localStorage.setItem('primomax_user', JSON.stringify(currentUser));
-
-            closeTaskModal();
+            document.getElementById('task-modal').remove();
+            alert(`Task completed successfully! +$${taskReward} added to your balance.`);
             renderDashboard('home');
-            alert("Task completed successfully! $1.5 added to your balance.");
         }
 
-        function closeTaskModal() {
-            const modal = document.getElementById('task-modal');
-            if (modal) {
-                modal.parentElement.remove();
-            }
+        // --- STATS TAB CONTENT ---
+        async function getStatsTabContent() {
+            const { count } = await supabaseClient
+                .from('users')
+                .select('*', { count: 'exact', head: true })
+                .eq('referred_by', currentUser.referral_code);
+
+            const { data: teamMembers } = await supabaseClient
+                .from('users')
+                .select('full_name, email, created_at, status')
+                .eq('referred_by', currentUser.referral_code);
+
+            let membersHtml = teamMembers && teamMembers.length > 0 ? teamMembers.map(m => `
+                <div class="bg-amber-50/40 border border-amber-100 p-3 rounded-2xl flex items-center justify-between text-xs">
+                    <div>
+                        <p class="font-black text-slate-900">${m.full_name}</p>
+                        <p class="text-[10px] text-slate-500">${m.email}</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${m.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${m.status}</span>
+                </div>
+            `).join('') : `<div class="text-center py-6 text-xs text-slate-400 font-medium">No team members added yet</div>`;
+
+            return `
+                <div class="p-6 space-y-4">
+                    <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 p-6 rounded-3xl text-white shadow-md space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-black uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full"><i class="fa-solid fa-users mr-1"></i> My Team Network</span>
+                            <span class="text-[10px] font-black bg-white/20 px-3 py-1 rounded-full">Level 1</span>
+                        </div>
+                        <h2 class="text-3xl font-black">${count || 0}</h2>
+                        <p class="text-xs font-semibold opacity-90 uppercase tracking-wide">Total Members Added</p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-amber-50/60 border border-amber-200/60 p-3 rounded-2xl">
+                            <p class="text-[9px] text-slate-500 font-bold uppercase">Team Size</p>
+                            <p class="text-base font-black text-amber-700 mt-1">${count || 0}</p>
+                        </div>
+                        <div class="bg-amber-50/60 border border-amber-200/60 p-3 rounded-2xl">
+                            <p class="text-[9px] text-slate-500 font-bold uppercase">Commission</p>
+                            <p class="text-base font-black text-amber-700 mt-1">$${(count * 0.50).toFixed(2)}</p>
+                        </div>
+                        <div class="bg-amber-50/60 border border-amber-200/60 p-3 rounded-2xl">
+                            <p class="text-[9px] text-slate-500 font-bold uppercase">Level</p>
+                            <p class="text-base font-black text-amber-700 mt-1">1</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-amber-200/60 p-4 rounded-2xl space-y-3 shadow-sm">
+                        <div class="flex items-center justify-between pb-2 border-b border-amber-100">
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-800">Team Members Directory</h4>
+                            <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">${count || 0} TOTAL</span>
+                        </div>
+                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                            ${membersHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
         }
+
+        // --- WALLET TAB CONTENT ---
+        async function getWalletTabContent() {
+            const { data: withdrawals } = await supabaseClient
+                .from('withdrawals')
+                .select('*')
+                .eq('user_email', currentUser.email)
+                .order('created_at', { ascending: false });
+
+            let historyHtml = withdrawals && withdrawals.length > 0 ? withdrawals.map(w => `
+                <div class="bg-amber-50/40 border border-amber-100 p-3.5 rounded-2xl flex items-center justify-between text-xs">
+                    <div>
+                        <p class="font-black text-slate-900">$${parseFloat(w.amount).toFixed(2)} <span class="text-amber-700">(${w.method})</span></p>
+                        <p class="text-[10px] text-slate-500">Acc: ${w.account_number}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-xl text-[10px] font-extrabold ${w.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${w.status}</span>
+                </div>
+            `).join('') : `<p class="text-center text-xs text-slate-400 py-4 font-medium">No withdrawal history</p>`;
+
+            return `
+                <div class="p-6 space-y-4">
+                    <div class="bg-white border border-amber-200/60 p-5 rounded-3xl text-center shadow-sm">
+                        <p class="text-[10px] font-black uppercase tracking-wider text-slate-500">Available Balance</p>
+                        <h2 class="text-3xl font-black text-slate-900 mt-1">$${parseFloat(currentUser.balance).toFixed(2)}</h2>
+                    </div>
+
+                    <div class="bg-white border border-amber-200/60 p-5 rounded-3xl space-y-3 shadow-sm">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Payment Method</label>
+                            <select id="w-method" class="w-full bg-amber-50/50 border border-amber-200 rounded-2xl py-3 px-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-amber-500">
+                                <option value="SadaPay">SadaPay</option>
+                                <option value="JazzCash">JazzCash</option>
+                                <option value="EasyPaisa">EasyPaisa</option>
+                                <option value="UPaisa">UPaisa</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px] font-black uppercase text-slate-600">
+                                <label>Amount to Withdraw ($)</label>
+                                <span class="text-amber-700">Min: $0.50</span>
+                            </div>
+                            <input type="number" id="w-amount" placeholder="Enter Amount ($)" class="w-full bg-amber-50/50 border border-amber-200 rounded-2xl py-3 px-3 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Account Number</label>
+                            <input type="text" id="w-acc" placeholder="Account Number" class="w-full bg-amber-50/50 border border-amber-200 rounded-2xl py-3 px-3 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Account Holder Name</label>
+                            <input type="text" id="w-name" placeholder="Account Holder Name" class="w-full bg-amber-50/50 border border-amber-200 rounded-2xl py-3 px-3 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <button onclick="handleWithdrawSubmit()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black py-3.5 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:opacity-95 transition">
+                            <i class="fa-solid fa-money-bill-transfer mr-1"></i> Withdraw
+                        </button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-amber-600"></i> Withdrawal History & Status</h4>
+                        <div class="space-y-2">
+                            ${historyHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- PROFILE TAB CONTENT (WITH DP UPLOAD) ---
+        function getProfileTabContent() {
+            const avatarDisplay = currentUser.avatar_url 
+                ? `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover">` 
+                : currentUser.full_name.charAt(0);
+
+            return `
+                <div class="p-6 space-y-5 pb-10">
+                    <!-- Top Avatar & Name Section with DP Upload Trigger -->
+                    <div class="flex flex-col items-center pt-2 relative">
+                        <div onclick="document.getElementById('avatar-input').click()" class="w-24 h-24 rounded-full bg-amber-200/80 border-4 border-amber-100 overflow-hidden flex items-center justify-center text-amber-800 text-2xl font-black shadow-inner relative cursor-pointer group">
+                            ${avatarDisplay}
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition">
+                                <i class="fa-solid fa-camera text-sm"></i>
+                            </div>
+                            <div class="absolute bottom-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] shadow pointer-events-none">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </div>
+                        </div>
+                        <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                        <p class="text-[10px] text-amber-600 font-bold mt-1 cursor-pointer" onclick="document.getElementById('avatar-input').click()">Tap to change picture</p>
+
+                        <h3 class="text-base font-black text-slate-900 mt-1">${currentUser.full_name}</h3>
+                        <p class="text-[11px] text-amber-700 font-bold mt-0.5 flex items-center gap-1">
+                            <i class="fa-solid fa-clock text-[10px]"></i> Since Jul 2026
+                        </p>
+                    </div>
+
+                    <!-- Form Inputs Section -->
+                    <div class="space-y-4">
+                        <!-- Full Name -->
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Full Name</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" id="p-name" value="${currentUser.full_name}" class="w-full bg-amber-50/40 border border-amber-200/70 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-slate-800 focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Email</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-envelope"></i></span>
+                                <input type="email" value="${currentUser.email}" disabled class="w-full bg-amber-50/20 border border-amber-200/60 rounded-2xl py-3 pl-10 pr-20 text-xs font-bold text-slate-500">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <span class="bg-emerald-100 text-emerald-700 text-[9px] font-black px-2 py-0.5 rounded-md">SECURED</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-600">Phone</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-phone"></i></span>
+                                <input type="text" id="p-phone" value="${currentUser.phone}" class="w-full bg-amber-50/40 border border-amber-200/70 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-slate-800 focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+
+                        <!-- Security Header -->
+                        <div class="pt-2">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-amber-700 flex items-center gap-1">
+                                <i class="fa-solid fa-shield-halved"></i> Security
+                            </p>
+                        </div>
+
+                        <!-- Current Password -->
+                        <div class="space-y-1">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="p-curr-pass" placeholder="Current password" class="w-full bg-amber-50/40 border border-amber-200/70 rounded-2xl py-3 pl-10 pr-10 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                                <span onclick="togglePassword('p-curr-pass', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-amber-600 text-xs cursor-pointer"><i class="fa-solid fa-eye"></i></span>
+                            </div>
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="space-y-1">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-amber-600 text-xs"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="p-new-pass" placeholder="New password" class="w-full bg-amber-50/40 border border-amber-200/70 rounded-2xl py-3 pl-10 pr-10 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                                <span onclick="togglePassword('p-new-pass', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-amber-600 text-xs cursor-pointer"><i class="fa-solid fa-eye"></i></span>
+                            </div>
+                        </div>
+
+                        <!-- Save Button -->
+                        <button onclick="saveProfile()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black py-3.5 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:opacity-95 transition mt-2">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64String = e.target.result;
+                
+                // Update user table with Base64 string
+                const { error: updateError } = await supabaseClient
+                    .from('users')
+                    .update({ avatar_url: base64String })
+                    .eq('email', currentUser.email);
+
+                if (updateError) {
+                    alert("Error saving DP to database: " + updateError.message);
+                    return;
+                }
+
+                currentUser.avatar_url = base64String;
+                localStorage.setItem('primomax_user', JSON.stringify(currentUser));
+                alert("Profile picture updated successfully!");
+                renderDashboard('profile');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function saveProfile() {
+            const newName = document.getElementById('p-name').value;
+            const newPhone = document.getElementById('p-phone').value;
+            const currPass = document.getElementById('p-curr-pass').value;
+            const newPass = document.getElementById('p-new-pass').value;
+
+            let updateData = { full_name: newName, phone: newPhone };
+
+            if (newPass) {
+                if (!currPass || currPass !== currentUser.password) {
+                    alert("Incorrect current password!");
+                    return;
+                }
+                updateData.password = newPass;
+            }
+
+            const { error } = await supabaseClient
+                .from('users')
+                .update(updateData)
+                .eq('email', currentUser.email);
+
+            if (error) {
+                alert("Error updating profile: " + error.message);
+                return;
+            }
+
+            currentUser.full_name = newName;
+            currentUser.phone = newPhone;
+            if (newPass) currentUser.password = newPass;
+            
+            localStorage.setItem('primomax_user', JSON.stringify(currentUser));
+            alert("Profile updated successfully!");
+            renderDashboard('profile');
+        }
+
+        function logout() {
+            localStorage.removeItem('primomax_user');
+            currentUser = null;
+            renderLogin();
+        }
+
+        window.onload = initApp;
     </script>
 </body>
 </html>
