@@ -328,11 +328,11 @@
                             </div>
                         </div>
 
-                        <button onclick="checkApprovalStatus()" class="w-full bg-emerald-600 text-white font-extrabold py-3.5 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:bg-emerald-700 transition">
+                        <button type="button" onclick="checkApprovalStatus()" class="w-full bg-emerald-600 text-white font-extrabold py-3.5 rounded-2xl shadow-md text-xs uppercase tracking-wider hover:bg-emerald-700 transition cursor-pointer relative z-50">
                             <i class="fa-solid fa-rotate mr-1"></i> Check Approval Status
                         </button>
 
-                        <button onclick="logout()" class="w-full bg-rose-50 text-rose-600 font-extrabold py-3 rounded-2xl text-xs uppercase tracking-wider hover:bg-rose-100 transition">
+                        <button type="button" onclick="logout()" class="w-full bg-rose-50 text-rose-600 font-extrabold py-3 rounded-2xl text-xs uppercase tracking-wider hover:bg-rose-100 transition cursor-pointer relative z-50">
                             <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout / Exit
                         </button>
                     </div>
@@ -356,6 +356,8 @@
                 } else {
                     alert("Your account is still pending approval by admin.");
                 }
+            } else {
+                alert("Error checking status. Please try again.");
             }
         }
 
@@ -534,7 +536,6 @@
             }
 
             const newCompleted = currentUser.tasks_completed + 1;
-            // Updated bonus text amount corrected to 1.5 dollars as per requirements
             const taskReward = 1.5; 
             const newBalance = parseFloat(currentUser.balance) + taskReward;
             const newTotalEarned = parseFloat(currentUser.total_earned) + taskReward;
