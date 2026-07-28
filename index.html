@@ -92,13 +92,16 @@
             updateDashboardUI();
         }
 
+        let currentGeneratedLink = "";
+
         function openTaskModal() {
             if (currentUser.tasks_completed >= 3) {
                 alert("You have already completed all 3 tasks for today!");
                 return;
             }
 
-            const randomTaskLink = "https://example.com/task/" + Math.random().toString(36).substring(7);
+            currentGeneratedLink = "https://example.com/task/" + Math.random().toString(36).substring(7);
+            
             const modalHtml = `
                 <div id="task-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-center items-center p-4">
                     <div class="bg-white border border-amber-100 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-xl text-center max-h-[90vh] overflow-y-auto">
@@ -106,15 +109,27 @@
                             <i class="fa-solid fa-list-check"></i>
                         </div>
                         <div>
-                            <h3 class="text-base font-black text-slate-900">Task Available</h3>
-                            <p class="text-xs text-slate-500 mt-1">Click the link below to visit the task page, stay for 30 seconds, and then complete it.</p>
+                            <h3 class="text-base font-black text-slate-900">Complete Task</h3>
+                            <p class="text-xs text-slate-500 mt-1">Copy the link below, paste it into the box, and click Done to earn $0.05.</p>
                         </div>
-                        <a href="${randomTaskLink}" target="_blank" onclick="enableTaskCompleteButton()" class="block w-full bg-amber-50 border border-amber-200 text-amber-800 font-bold py-3 rounded-2xl text-xs hover:bg-amber-100 transition truncate px-4">
-                            <i class="fa-solid fa-external-link-alt mr-1"></i> Open Task Link
-                        </a>
-                        <button id="complete-task-btn" onclick="submitTaskCompletion()" disabled class="w-full bg-slate-300 text-slate-600 font-extrabold py-3 rounded-2xl text-xs uppercase tracking-wider cursor-not-allowed transition">
-                            Verify & Claim Reward ($1.5)
+
+                        <!-- Random Link Box with Copy Button -->
+                        <div class="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-2xl p-2">
+                            <input type="text" id="task-link-input" readonly value="${currentGeneratedLink}" class="w-full bg-transparent text-xs text-slate-700 px-2 outline-none truncate">
+                            <button onclick="copyTaskLink()" class="bg-amber-500 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-600 transition whitespace-nowrap">
+                                <i class="fa-solid fa-copy mr-1"></i> Copy
+                            </button>
+                        </div>
+
+                        <!-- Paste Input Box -->
+                        <div>
+                            <input type="text" id="user-paste-input" placeholder="Paste link here..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-700 p-3 outline-none focus:border-amber-500 transition">
+                        </div>
+
+                        <button onclick="verifyAndSubmitTask()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-3 rounded-2xl text-xs uppercase tracking-wider shadow-md hover:opacity-95 transition">
+                            Done ($0.05)
                         </button>
+                        
                         <button onclick="closeTaskModal()" class="w-full bg-rose-50 text-rose-600 font-extrabold py-2.5 rounded-2xl text-xs uppercase tracking-wider hover:bg-rose-100 transition">
                             Cancel
                         </button>
@@ -126,21 +141,30 @@
             document.body.appendChild(div);
         }
 
-        function enableTaskCompleteButton() {
-            const btn = document.getElementById('complete-task-btn');
-            if (btn) {
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.classList.remove('bg-slate-300', 'text-slate-600', 'cursor-not-allowed');
-                    btn.classList.add('bg-gradient-to-r', 'from-amber-500', 'to-orange-500', 'text-white', 'shadow-md', 'hover:opacity-95');
-                }, 3000);
-            }
+        function copyTaskLink() {
+            const linkInput = document.getElementById('task-link-input');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999); // For mobile devices
+            navigator.clipboard.writeText(linkInput.value);
+            alert("Link copied to clipboard!");
         }
 
-        async function submitTaskCompletion() {
+        async function verifyAndSubmitTask() {
+            const userPasteValue = document.getElementById('user-paste-input').value.trim();
+
+            if (!userPasteValue) {
+                alert("Please paste the link into the box first!");
+                return;
+            }
+
+            if (userPasteValue !== currentGeneratedLink) {
+                alert("The pasted link does not match the generated task link. Please copy and paste correctly.");
+                return;
+            }
+
             const newTasksCompleted = currentUser.tasks_completed + 1;
-            const newBalance = parseFloat(currentUser.balance) + 1.5;
-            const newTotalEarned = parseFloat(currentUser.total_earned) + 1.5;
+            const newBalance = parseFloat(currentUser.balance) + 0.05;
+            const newTotalEarned = parseFloat(currentUser.total_earned) + 0.05;
 
             const { error } = await supabaseClient
                 .from('users')
@@ -163,7 +187,7 @@
 
             closeTaskModal();
             renderDashboard('home');
-            alert("Task completed successfully! $1.5 added to your balance.");
+            alert("Task completed successfully! $0.05 added to your balance.");
         }
 
         function closeTaskModal() {
