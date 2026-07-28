@@ -7,9 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-amber-50/30 text-amber-950 font-sans antialiased pb-32">
+<body class="bg-amber-50/30 text-amber-950 font-sans antialiased">
 
-    <div class="max-w-md mx-auto relative px-4 pt-4 space-y-4">
+    <div class="max-w-md mx-auto min-h-screen relative pb-28 px-4 pt-4 space-y-4">
         
         <!-- Top Hero Banner -->
         <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-6 text-white shadow-xl shadow-orange-500/20">
@@ -79,30 +79,28 @@
 
     </div>
 
-    <!-- Bottom Navigation Bar (Fixed & Clickable) -->
-    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-amber-100 shadow-2xl">
-        <div class="max-w-md mx-auto py-3 px-6 flex justify-between items-center">
-            <a href="index.html" class="flex flex-col items-center text-amber-800/60 hover:text-amber-600 transition">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Home</span>
-            </a>
-            <a href="stats.html" class="flex flex-col items-center text-amber-600 transition">
-                <i class="fa-solid fa-chart-pie text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Stats</span>
-            </a>
-            <a href="wallet.html" class="flex flex-col items-center text-amber-800/60 hover:text-amber-600 transition">
-                <i class="fa-solid fa-wallet text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Wallet</span>
-            </a>
-            <a href="profile.html" class="flex flex-col items-center text-amber-800/60 hover:text-amber-600 transition">
-                <i class="fa-solid fa-user text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Profile</span>
-            </a>
-            <a href="exit.html" class="flex flex-col items-center text-red-500 hover:text-red-600 transition">
-                <i class="fa-solid fa-power-off text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Exit</span>
-            </a>
-        </div>
+    <!-- Bottom Navigation Bar -->
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-amber-100 py-3 px-6 flex justify-between items-center shadow-lg rounded-t-3xl z-50">
+        <a href="#" class="flex flex-col items-center text-amber-800/60 hover:text-amber-600 transition">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-[10px] font-bold mt-1">Home</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-amber-600 transition">
+            <i class="fa-solid fa-chart-pie text-lg"></i>
+            <span class="text-[10px] font-bold mt-1">Stats</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-amber-800/60 hover:text-amber-600 transition">
+            <i class="fa-solid fa-wallet text-lg"></i>
+            <span class="text-[10px] font-bold mt-1">Wallet</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-amber-800/60 hover:text-amber-600 transition">
+            <i class="fa-solid fa-user text-lg"></i>
+            <span class="text-[10px] font-bold mt-1">Profile</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-red-500 hover:text-red-600 transition">
+            <i class="fa-solid fa-power-off text-lg"></i>
+            <span class="text-[10px] font-bold mt-1">Exit</span>
+        </a>
     </div>
 
 </body>
