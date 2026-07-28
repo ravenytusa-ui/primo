@@ -238,7 +238,10 @@
 
                         <!-- Enter Amount -->
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Amount to Withdraw ($)</label>
+                            <div class="flex justify-between items-center">
+                                <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Amount to Withdraw ($)</label>
+                                <span class="text-[10px] text-amber-400 font-bold">Min: $0.50</span>
+                            </div>
                             <input type="number" id="w-amount" placeholder="Enter Amount to Withdraw ($)" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 px-4 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
                         </div>
 
@@ -281,6 +284,11 @@
 
             if(!amount || !accNum || !accName) {
                 alert("Please fill out all withdrawal fields!");
+                return;
+            }
+
+            if(amount < 0.50) {
+                alert("Minimum withdrawal amount is $0.50!");
                 return;
             }
 
