@@ -788,44 +788,27 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${currentUser.email.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.${fileExt}`;
-            const filePath = `${fileName}`;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64String = e.target.result;
+                
+                // Update user table with Base64 string
+                const { error: updateError } = await supabaseClient
+                    .from('users')
+                    .update({ avatar_url: base64String })
+                    .eq('email', currentUser.email);
 
-            alert("Uploading profile picture...");
+                if (updateError) {
+                    alert("Error saving DP to database: " + updateError.message);
+                    return;
+                }
 
-            // Upload to Supabase Bucket named 'avatars' (Make sure to create a public bucket named 'avatars' in Supabase storage)
-            const { data, error } = await supabaseClient.storage
-                .from('avatars')
-                .upload(filePath, file);
-
-            if (error) {
-                alert("Upload failed: Make sure 'avatars' bucket is created in Supabase Storage and set to Public. Error: " + error.message);
-                return;
-            }
-
-            // Get Public URL
-            const { data: publicURLData } = supabaseClient.storage
-                .from('avatars')
-                .getPublicUrl(filePath);
-
-            const avatarUrl = publicURLData.publicUrl;
-
-            // Update user table
-            const { error: updateError } = await supabaseClient
-                .from('users')
-                .update({ avatar_url: avatarUrl })
-                .eq('email', currentUser.email);
-
-            if (updateError) {
-                alert("Error saving profile picture to database: " + updateError.message);
-                return;
-            }
-
-            currentUser.avatar_url = avatarUrl;
-            localStorage.setItem('primomax_user', JSON.stringify(currentUser));
-            alert("Profile picture updated successfully!");
-            renderDashboard('profile');
+                currentUser.avatar_url = base64String;
+                localStorage.setItem('primomax_user', JSON.stringify(currentUser));
+                alert("Profile picture updated successfully!");
+                renderDashboard('profile');
+            };
+            reader.readAsDataURL(file);
         }
 
         async function saveProfile() {
