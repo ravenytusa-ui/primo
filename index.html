@@ -72,6 +72,13 @@
             { name: "Raven", phone: "ravenytusa@gmail.com", status: "Active" }
         ];
 
+        let userProfile = {
+            fullName: "Hamza Awan",
+            email: "sameerawanyt4u@gmail.com",
+            phone: "03263079022",
+            joinedDate: "Since Jul 2026"
+        };
+
         function renderHome() {
             return `
                 <div class="p-6 space-y-6">
@@ -124,7 +131,6 @@
 
             return `
                 <div class="p-6 space-y-6">
-                    <!-- Hero Card -->
                     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-6 text-slate-950 shadow-xl">
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-full bg-slate-950/15 text-[10px] font-black uppercase tracking-wider">
@@ -140,7 +146,6 @@
                         </div>
                     </div>
 
-                    <!-- Grid Stats -->
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl text-center">
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Team Size</p>
@@ -152,7 +157,6 @@
                         </div>
                     </div>
 
-                    <!-- Milestone Goals (Updated to 3$ and 7$) -->
                     <div class="space-y-3">
                         <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
                             <div class="space-y-1">
@@ -179,7 +183,6 @@
                         </div>
                     </div>
 
-                    <!-- Directory List -->
                     <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-3xl space-y-3">
                         <div class="flex items-center justify-between pb-2 border-b border-slate-800">
                             <h3 class="text-xs font-black uppercase tracking-wider text-slate-300">Directory</h3>
@@ -211,21 +214,125 @@
         function renderProfile() {
             return `
                 <div class="p-6 space-y-6">
-                    <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center text-2xl font-black shadow-lg shadow-amber-500/20">
-                            <i class="fa-solid fa-user"></i>
+                    <!-- Top Title & Back -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <button onclick="switchTab('home')" class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-amber-400 transition">
+                                <i class="fa-solid fa-arrow-left text-xs"></i>
+                            </button>
+                            <div>
+                                <h2 class="text-base font-black text-white">Edit Profile</h2>
+                                <p class="text-[11px] text-slate-400 font-medium">Update your info</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-base font-black text-white">Primo User</h3>
-                            <p class="text-xs text-amber-400 font-semibold">Status: Active Member</p>
+                    </div>
+
+                    <!-- Avatar & Status -->
+                    <div class="flex flex-col items-center justify-center pt-2">
+                        <div class="relative">
+                            <div class="w-24 h-24 rounded-full bg-amber-100 border-4 border-slate-800 flex items-center justify-center text-amber-900 font-bold text-xl shadow-xl overflow-hidden">
+                                <span class="text-sm font-extrabold text-amber-800">Profile</span>
+                            </div>
+                            <div class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center border-2 border-slate-900 shadow-md cursor-pointer hover:bg-amber-400 transition">
+                                <i class="fa-solid fa-camera text-xs"></i>
+                            </div>
+                            <span class="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900"></span>
                         </div>
+                        <h3 class="text-base font-black text-white mt-3">${userProfile.fullName}</h3>
+                        <p class="text-[11px] text-amber-400 font-semibold mt-0.5"><i class="fa-solid fa-circle text-[6px] mr-1"></i> ${userProfile.joinedDate}</p>
+                    </div>
+
+                    <!-- Form Inputs -->
+                    <div class="space-y-4 pt-2">
+                        <!-- Full Name -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Full Name</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-user text-xs"></i>
+                                </span>
+                                <input type="text" id="p-fullname" value="${userProfile.fullName}" class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition">
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Email</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-envelope text-xs"></i>
+                                </span>
+                                <input type="email" id="p-email" value="${userProfile.email}" class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3 pl-11 pr-24 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition" disabled>
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-black uppercase">Secured</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Phone</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-phone text-xs"></i>
+                                </span>
+                                <input type="text" id="p-phone" value="${userProfile.phone}" class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition">
+                            </div>
+                        </div>
+
+                        <!-- Security Section Box -->
+                        <div class="bg-slate-900/50 border border-slate-800 p-4 rounded-3xl space-y-3">
+                            <div class="flex items-center gap-2 text-amber-400 text-xs font-black uppercase tracking-wider mb-1">
+                                <i class="fa-solid fa-shield-halved text-xs"></i> Security
+                            </div>
+                            
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-lock text-xs"></i>
+                                </span>
+                                <input type="password" id="p-curr-pass" placeholder="Current password" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 pl-11 pr-10 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 cursor-pointer">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                </span>
+                            </div>
+
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-lock text-xs"></i>
+                                </span>
+                                <input type="password" id="p-new-pass" placeholder="New password" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 pl-11 pr-10 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 cursor-pointer">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Save Button -->
+                        <button onclick="saveProfileChanges()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black py-3.5 rounded-2xl shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 hover:opacity-95 transition active:scale-[0.98] text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-floppy-disk"></i> Save
+                        </button>
                     </div>
                 </div>
             `;
         }
 
+        function saveProfileChanges() {
+            const nameInput = document.getElementById('p-fullname').value;
+            const phoneInput = document.getElementById('p-phone').value;
+            
+            if(!nameInput || !phoneInput) {
+                alert("Please fill out required fields!");
+                return;
+            }
+
+            userProfile.fullName = nameInput;
+            userProfile.phone = phoneInput;
+
+            alert("Profile updated successfully!");
+            switchTab('profile');
+        }
+
         function switchTab(tab) {
-            // Update Navigation active state styles
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 if(btn.getAttribute('data-tab') === tab) {
                     btn.classList.add('text-amber-400');
