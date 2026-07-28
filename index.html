@@ -6,41 +6,66 @@
     <title>Primo Max</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta+Sans', sans-serif; }
+    </style>
 </head>
-<body class="bg-amber-50/30 text-amber-950 font-sans antialiased">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex justify-center items-center p-0 md:p-4">
 
-    <!-- App Container -->
-    <div id="app" class="max-w-md mx-auto min-h-screen relative pb-20">
-        <!-- Main Content Area Rendered via JavaScript -->
-        <div id="main-content"></div>
+    <!-- Mobile App Frame Wrapper -->
+    <div class="w-full max-w-md bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 md:rounded-3xl md:border md:border-slate-800 shadow-2xl min-h-screen md:min-h-[850px] relative flex flex-col overflow-hidden">
+        
+        <!-- Header Top Bar -->
+        <header class="px-6 pt-6 pb-4 flex items-center justify-between border-b border-slate-800/60 bg-slate-900/50 backdrop-blur-md sticky top-0 z-40">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 text-white font-black text-lg">
+                    P
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold tracking-tight text-white">Primo Max</h1>
+                    <p class="text-[11px] text-amber-400 font-medium">Enterprise Ecosystem</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="w-9 h-9 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-slate-300 hover:text-amber-400 transition">
+                    <i class="fa-solid fa-bell text-xs"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Main Scrollable Content Area -->
+        <main id="main-content" class="flex-1 overflow-y-auto pb-28">
+            <!-- Content injected via JS -->
+        </main>
 
         <!-- Bottom Navigation Bar -->
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 backdrop-blur-md border-t border-amber-100 px-6 py-3 flex justify-between items-center shadow-lg z-50">
-            <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-amber-600" data-tab="home">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Home</span>
+        <nav class="absolute bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-xl border-t border-slate-800 px-4 py-3 flex justify-around items-center z-50">
+            <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center gap-1 text-slate-400 transition" data-tab="home">
+                <i class="fa-solid fa-house text-base"></i>
+                <span class="text-[10px] font-bold">Home</span>
             </button>
-            <button onclick="switchTab('stats')" class="nav-btn flex flex-col items-center text-amber-600" data-tab="stats">
-                <i class="fa-solid fa-chart-pie text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Stats</span>
+            <button onclick="switchTab('stats')" class="nav-btn flex flex-col items-center gap-1 text-slate-400 transition" data-tab="stats">
+                <i class="fa-solid fa-chart-pie text-base"></i>
+                <span class="text-[10px] font-bold">Stats</span>
             </button>
-            <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center text-amber-400" data-tab="wallet">
-                <i class="fa-solid fa-wallet text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Wallet</span>
+            <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center gap-1 text-slate-400 transition" data-tab="wallet">
+                <i class="fa-solid fa-wallet text-base"></i>
+                <span class="text-[10px] font-bold">Wallet</span>
             </button>
-            <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center text-amber-400" data-tab="profile">
-                <i class="fa-solid fa-user text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Profile</span>
+            <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center gap-1 text-slate-400 transition" data-tab="profile">
+                <i class="fa-solid fa-user text-base"></i>
+                <span class="text-[10px] font-bold">Profile</span>
             </button>
-            <button onclick="switchTab('exit')" class="nav-btn flex flex-col items-center text-red-500" data-tab="exit">
-                <i class="fa-solid fa-power-off text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Exit</span>
+            <button onclick="switchTab('exit')" class="nav-btn flex flex-col items-center gap-1 text-rose-400 transition" data-tab="exit">
+                <i class="fa-solid fa-power-off text-base"></i>
+                <span class="text-[10px] font-bold">Exit</span>
             </button>
         </nav>
     </div>
 
     <script>
-        // Team Members Data Cache
+        // Data Cache
         let teamMembersCache = [
             { name: "111", phone: "111", status: "Active" },
             { name: "wewe", phone: "wewe", status: "Active" },
@@ -49,14 +74,30 @@
 
         function renderHome() {
             return `
-                <div class="space-y-4 px-4 pt-4 pb-24">
-                    <div class="bg-gradient-to-br from-amber-500 to-orange-600 p-6 rounded-3xl text-white shadow-xl shadow-orange-500/20">
-                        <h2 class="text-2xl font-black mb-1">Primo Max Dashboard</h2>
-                        <p class="text-xs text-amber-100 font-medium">Welcome back! Manage your network easily.</p>
+                <div class="p-6 space-y-6">
+                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 p-6 text-slate-950 shadow-xl shadow-amber-500/10">
+                        <div class="relative z-10 space-y-2">
+                            <span class="px-3 py-1 rounded-full bg-slate-950/10 text-slate-950 font-black text-[10px] uppercase tracking-wider">Welcome Back</span>
+                            <h2 class="text-2xl font-black tracking-tight">Primo Max Dashboard</h2>
+                            <p class="text-xs font-semibold text-slate-900/80">Manage your network, scale your progress, and unlock elite rewards seamlessly.</p>
+                        </div>
                     </div>
-                    <div class="bg-white p-5 rounded-3xl border border-amber-100/80 shadow-sm space-y-3">
-                        <h3 class="text-xs font-black uppercase text-amber-900"><i class="fa-solid fa-bullhorn text-amber-600 mr-2"></i> Quick Notice</h3>
-                        <p class="text-xs text-amber-800/80 leading-relaxed">Share your invite link to build your team and achieve higher milestone rewards and salaries.</p>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm font-bold mb-2">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <p class="text-[11px] text-slate-400 font-bold uppercase">System Status</p>
+                            <p class="text-sm font-extrabold text-white mt-1">Operational</p>
+                        </div>
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+                            <div class="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center text-sm font-bold mb-2">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <p class="text-[11px] text-slate-400 font-bold uppercase">Security</p>
+                            <p class="text-sm font-extrabold text-white mt-1">Encrypted</p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -64,157 +105,104 @@
 
         function renderStats() {
             const count = teamMembersCache.length;
-
             let membersListHtml = teamMembersCache.length > 0 ? 
                 teamMembersCache.map(m => `
-                    <div class="bg-amber-50/50 p-3 rounded-2xl border border-amber-200/60 flex items-center justify-between">
+                    <div class="bg-slate-900/60 border border-slate-800/80 p-3.5 rounded-2xl flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-sm">
                                 <i class="fa-solid fa-user"></i>
                             </div>
                             <div>
-                                <p class="text-xs font-black text-amber-950">${m.name}</p>
-                                <p class="text-[10px] text-amber-600 font-semibold">${m.phone}</p>
+                                <p class="text-xs font-black text-white">${m.name}</p>
+                                <p class="text-[10px] text-slate-400 font-medium">${m.phone}</p>
                             </div>
                         </div>
-                        <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">${m.status}</span>
+                        <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-extrabold">${m.status}</span>
                     </div>
                 `).join('') : 
-                `<div class="text-center py-6 bg-amber-50/40 rounded-2xl border border-dashed border-amber-200"><i class="fa-solid fa-users-slash text-amber-400 text-2xl mb-1"></i><p class="text-xs text-amber-700 font-medium">No team members yet</p></div>`;
+                `<div class="text-center py-8 bg-slate-900/40 rounded-2xl border border-dashed border-slate-800"><p class="text-xs text-slate-400 font-medium">No team members added yet</p></div>`;
 
             return `
-                <div class="space-y-4 pb-24 max-w-md mx-auto px-4 pt-4">
-                    
-                    <!-- Top Hero Banner -->
-                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-6 text-white shadow-xl shadow-orange-500/20">
-                        <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-                        <div class="absolute -left-8 -bottom-8 w-32 h-32 bg-black/10 rounded-full blur-2xl pointer-events-none"></div>
-                        
-                        <div class="relative z-10">
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/25 backdrop-blur-md text-xs font-bold uppercase tracking-wider">
-                                    <i class="fa-solid fa-users text-amber-200"></i> My Team Network
-                                </span>
-                                <span class="px-3 py-1 rounded-full bg-black/25 backdrop-blur-md text-xs font-extrabold text-amber-100">
-                                    Level 1
-                                </span>
-                            </div>
-                            
-                            <div class="flex items-baseline gap-2">
-                                <h2 class="text-4xl font-black tracking-tight">${count}</h2>
-                                <p class="text-xs font-semibold text-amber-100/90 uppercase tracking-wide">Total Members Added</p>
-                            </div>
+                <div class="p-6 space-y-6">
+                    <!-- Hero Card -->
+                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-6 text-slate-950 shadow-xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full bg-slate-950/15 text-[10px] font-black uppercase tracking-wider">
+                                <i class="fa-solid fa-users mr-1"></i> My Team Network
+                            </span>
+                            <span class="px-3 py-1 rounded-full bg-slate-950/20 text-[10px] font-black uppercase">
+                                Level 1
+                            </span>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <h2 class="text-4xl font-black tracking-tight">${count}</h2>
+                            <p class="text-xs font-extrabold text-slate-900/80 uppercase">Total Members Added</p>
                         </div>
                     </div>
 
-                    <!-- Quick Stats Grid (2 Columns) -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-white/90 backdrop-blur-xl p-4 rounded-2xl border border-amber-100/80 shadow-lg shadow-amber-500/5 text-center">
-                            <div class="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold">
-                                <i class="fa-solid fa-user-group"></i>
-                            </div>
-                            <p class="text-[10px] text-amber-800/70 font-extrabold uppercase tracking-wider">Team Size</p>
-                            <p class="text-xl font-black text-amber-950 mt-0.5">${count}</p>
+                    <!-- Grid Stats -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl text-center">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Team Size</p>
+                            <p class="text-xl font-black text-amber-400 mt-1">${count}</p>
                         </div>
-
-                        <div class="bg-white/90 backdrop-blur-xl p-4 rounded-2xl border border-amber-100/80 shadow-lg shadow-amber-500/5 text-center">
-                            <div class="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold">
-                                <i class="fa-solid fa-layer-group"></i>
-                            </div>
-                            <p class="text-[10px] text-amber-800/70 font-extrabold uppercase tracking-wider">Level</p>
-                            <p class="text-xl font-black text-amber-950 mt-0.5">1</p>
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl text-center">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tier Level</p>
+                            <p class="text-xl font-black text-amber-400 mt-1">1</p>
                         </div>
                     </div>
 
-                    <!-- Milestone Goals / Rewards Section (Updated to 3$ and 7$) -->
+                    <!-- Milestone Goals (Updated to 3$ and 7$) -->
                     <div class="space-y-3">
-                        
-                        <!-- Goal 1 -->
-                        <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 flex items-center justify-center font-bold text-base shadow-inner">
-                                    <i class="fa-solid fa-award"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-black text-amber-950">Add 10 member for 3 dollar reward</p>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <div class="w-24 h-2 bg-amber-100 rounded-full overflow-hidden">
-                                            <div class="bg-amber-500 h-full rounded-full" style="width: ${Math.min((count/10)*100, 100)}%"></div>
-                                        </div>
-                                        <span class="text-[10px] text-amber-700 font-bold">Progress: ${count}/10</span>
-                                    </div>
-                                </div>
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
+                            <div class="space-y-1">
+                                <p class="text-xs font-black text-white">Add 10 member for 3 dollar reward</p>
+                                <p class="text-[10px] text-slate-400 font-semibold">Progress: ${count}/10</p>
                             </div>
-                            <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-200/50">Reward</span>
+                            <span class="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase">Reward</span>
                         </div>
 
-                        <!-- Goal 2 -->
-                        <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 flex items-center justify-center font-bold text-base shadow-inner">
-                                    <i class="fa-solid fa-gift"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-black text-amber-950">Add 20 users for 7 dollar reward</p>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <div class="w-24 h-2 bg-amber-100 rounded-full overflow-hidden">
-                                            <div class="bg-amber-500 h-full rounded-full" style="width: ${Math.min((count/20)*100, 100)}%"></div>
-                                        </div>
-                                        <span class="text-[10px] text-amber-700 font-bold">Progress: ${count}/20</span>
-                                    </div>
-                                </div>
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
+                            <div class="space-y-1">
+                                <p class="text-xs font-black text-white">Add 20 users for 7 dollar reward</p>
+                                <p class="text-[10px] text-slate-400 font-semibold">Progress: ${count}/20</p>
                             </div>
-                            <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-200/50">Reward</span>
+                            <span class="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase">Reward</span>
                         </div>
 
-                        <!-- Goal 3 -->
-                        <div class="bg-white p-4 rounded-2xl border border-amber-100/80 shadow-md shadow-amber-500/5 flex items-center justify-between">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-orange-500/20">
-                                    <i class="fa-solid fa-trophy"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-black text-amber-950">Add 30 member for weekly salary</p>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <div class="w-24 h-2 bg-amber-100 rounded-full overflow-hidden">
-                                            <div class="bg-amber-600 h-full rounded-full" style="width: ${Math.min((count/30)*100, 100)}%"></div>
-                                        </div>
-                                        <span class="text-[10px] text-amber-700 font-bold">Progress: ${count}/30</span>
-                                    </div>
-                                </div>
+                        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
+                            <div class="space-y-1">
+                                <p class="text-xs font-black text-white">Add 30 member for weekly salary</p>
+                                <p class="text-[10px] text-slate-400 font-semibold">Progress: ${count}/30</p>
                             </div>
-                            <span class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">Salary</span>
+                            <span class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-[10px] font-black uppercase shadow-md">Salary</span>
                         </div>
                     </div>
 
-                    <!-- Team Members Directory -->
-                    <div class="bg-white rounded-3xl p-5 border border-amber-100/80 shadow-lg shadow-amber-500/5">
-                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-amber-50">
-                            <h3 class="text-xs font-black uppercase tracking-wider text-amber-900 flex items-center gap-2">
-                                <i class="fa-solid fa-list-ul text-amber-600"></i> Team Members Directory
-                            </h3>
-                            <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 text-[10px] font-black">${count} Total</span>
+                    <!-- Directory List -->
+                    <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-3xl space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                            <h3 class="text-xs font-black uppercase tracking-wider text-slate-300">Directory</h3>
+                            <span class="px-2 py-0.5 rounded-md bg-slate-800 text-amber-400 text-[10px] font-bold">${count} Total</span>
                         </div>
-                        
-                        <div class="max-h-52 overflow-y-auto pr-1 space-y-2.5">
+                        <div class="space-y-2.5 max-h-56 overflow-y-auto pr-1">
                             ${membersListHtml}
                         </div>
                     </div>
-
                 </div>
             `;
         }
 
         function renderWallet() {
             return `
-                <div class="space-y-4 px-4 pt-4 pb-24">
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100/80 shadow-sm text-center space-y-2">
-                        <p class="text-xs font-bold text-amber-700 uppercase">Available Balance</p>
-                        <h2 class="text-3xl font-black text-amber-950">$0.00</h2>
+                <div class="p-6 space-y-6">
+                    <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl text-center space-y-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Available Balance</p>
+                        <h2 class="text-4xl font-black text-white">$0.00</h2>
                     </div>
-                    <div class="bg-white p-5 rounded-3xl border border-amber-100/80 shadow-sm space-y-3">
-                        <h3 class="text-xs font-black uppercase text-amber-900"><i class="fa-solid fa-wallet text-amber-600 mr-2"></i> Recent Transactions</h3>
-                        <p class="text-xs text-amber-700/70 text-center py-6">No transaction records found</p>
+                    <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-3xl space-y-3">
+                        <h3 class="text-xs font-black uppercase text-slate-300 border-b border-slate-800 pb-2">Recent Transactions</h3>
+                        <p class="text-xs text-slate-500 text-center py-6">No transaction records found</p>
                     </div>
                 </div>
             `;
@@ -222,14 +210,14 @@
 
         function renderProfile() {
             return `
-                <div class="space-y-4 px-4 pt-4 pb-24">
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100/80 shadow-sm flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl font-bold shadow-md">
+                <div class="p-6 space-y-6">
+                    <div class="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center text-2xl font-black shadow-lg shadow-amber-500/20">
                             <i class="fa-solid fa-user"></i>
                         </div>
                         <div>
-                            <h3 class="text-base font-black text-amber-950">Primo User</h3>
-                            <p class="text-xs text-amber-600 font-medium">Status: Active Member</p>
+                            <h3 class="text-base font-black text-white">Primo User</h3>
+                            <p class="text-xs text-amber-400 font-semibold">Status: Active Member</p>
                         </div>
                     </div>
                 </div>
@@ -237,6 +225,17 @@
         }
 
         function switchTab(tab) {
+            // Update Navigation active state styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.getAttribute('data-tab') === tab) {
+                    btn.classList.add('text-amber-400');
+                    btn.classList.remove('text-slate-400');
+                } else {
+                    btn.classList.remove('text-amber-400');
+                    btn.classList.add('text-slate-400');
+                }
+            });
+
             const container = document.getElementById('main-content');
             if (tab === 'home') container.innerHTML = renderHome();
             else if (tab === 'stats') container.innerHTML = renderStats();
