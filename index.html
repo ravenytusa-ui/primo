@@ -416,12 +416,16 @@
 
             const refLink = `${window.location.origin}${window.location.pathname}?ref=${currentUser.referral_code}`;
 
+            const avatarHtml = currentUser.avatar_url 
+                ? `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover">` 
+                : currentUser.full_name.charAt(0);
+
             return `
                 <div class="p-6 space-y-4">
                     <div class="flex items-center justify-between bg-amber-50/50 border border-amber-100 p-3 rounded-2xl">
                         <div class="flex items-center gap-2.5">
                             <div class="w-10 h-10 rounded-full bg-amber-200 overflow-hidden flex items-center justify-center font-bold text-amber-800">
-                                ${currentUser.full_name.charAt(0)}
+                                ${avatarHtml}
                             </div>
                             <div>
                                 <h3 class="text-xs font-black text-slate-900">Welcome back, ${currentUser.full_name}!</h3>
@@ -686,19 +690,29 @@
             `;
         }
 
-        // --- PROFILE TAB CONTENT (MATCHING IMAGE 2) ---
+        // --- PROFILE TAB CONTENT (WITH DP UPLOAD) ---
         function getProfileTabContent() {
+            const avatarDisplay = currentUser.avatar_url 
+                ? `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover">` 
+                : currentUser.full_name.charAt(0);
+
             return `
                 <div class="p-6 space-y-5 pb-10">
-                    <!-- Top Avatar & Name Section -->
+                    <!-- Top Avatar & Name Section with DP Upload Trigger -->
                     <div class="flex flex-col items-center pt-2 relative">
-                        <div class="w-24 h-24 rounded-full bg-amber-200/80 border-4 border-amber-100 overflow-hidden flex items-center justify-center text-amber-800 text-2xl font-black shadow-inner relative">
-                            ${currentUser.full_name.charAt(0)}
-                            <div class="absolute bottom-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] shadow">
+                        <div onclick="document.getElementById('avatar-input').click()" class="w-24 h-24 rounded-full bg-amber-200/80 border-4 border-amber-100 overflow-hidden flex items-center justify-center text-amber-800 text-2xl font-black shadow-inner relative cursor-pointer group">
+                            ${avatarDisplay}
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition">
+                                <i class="fa-solid fa-camera text-sm"></i>
+                            </div>
+                            <div class="absolute bottom-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] shadow pointer-events-none">
                                 <i class="fa-solid fa-user-gear"></i>
                             </div>
                         </div>
-                        <h3 class="text-base font-black text-slate-900 mt-2">${currentUser.full_name}</h3>
+                        <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                        <p class="text-[10px] text-amber-600 font-bold mt-1 cursor-pointer" onclick="document.getElementById('avatar-input').click()">Tap to change picture</p>
+
+                        <h3 class="text-base font-black text-slate-900 mt-1">${currentUser.full_name}</h3>
                         <p class="text-[11px] text-amber-700 font-bold mt-0.5 flex items-center gap-1">
                             <i class="fa-solid fa-clock text-[10px]"></i> Since Jul 2026
                         </p>
@@ -768,6 +782,50 @@
                     </div>
                 </div>
             `;
+        }
+
+        async function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${currentUser.email.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            alert("Uploading profile picture...");
+
+            // Upload to Supabase Bucket named 'avatars' (Make sure to create a public bucket named 'avatars' in Supabase storage)
+            const { data, error } = await supabaseClient.storage
+                .from('avatars')
+                .upload(filePath, file);
+
+            if (error) {
+                alert("Upload failed: Make sure 'avatars' bucket is created in Supabase Storage and set to Public. Error: " + error.message);
+                return;
+            }
+
+            // Get Public URL
+            const { data: publicURLData } = supabaseClient.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+            const avatarUrl = publicURLData.publicUrl;
+
+            // Update user table
+            const { error: updateError } = await supabaseClient
+                .from('users')
+                .update({ avatar_url: avatarUrl })
+                .eq('email', currentUser.email);
+
+            if (updateError) {
+                alert("Error saving profile picture to database: " + updateError.message);
+                return;
+            }
+
+            currentUser.avatar_url = avatarUrl;
+            localStorage.setItem('primomax_user', JSON.stringify(currentUser));
+            alert("Profile picture updated successfully!");
+            renderDashboard('profile');
         }
 
         async function saveProfile() {
