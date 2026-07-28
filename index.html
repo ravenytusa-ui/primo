@@ -76,7 +76,8 @@
             fullName: "Hamza Awan",
             email: "sameerawanyt4u@gmail.com",
             phone: "03263079022",
-            joinedDate: "Since Jul 2026"
+            joinedDate: "Since Jul 2026",
+            avatar: null
         };
 
         function renderHome() {
@@ -212,6 +213,10 @@
         }
 
         function renderProfile() {
+            const avatarContent = userProfile.avatar 
+                ? `<img src="${userProfile.avatar}" class="w-full h-full object-cover">`
+                : `<span class="text-sm font-extrabold text-amber-800">Profile</span>`;
+
             return `
                 <div class="p-6 space-y-6">
                     <!-- Top Title & Back -->
@@ -230,10 +235,13 @@
                     <!-- Avatar & Status -->
                     <div class="flex flex-col items-center justify-center pt-2">
                         <div class="relative">
-                            <div class="w-24 h-24 rounded-full bg-amber-100 border-4 border-slate-800 flex items-center justify-center text-amber-900 font-bold text-xl shadow-xl overflow-hidden">
-                                <span class="text-sm font-extrabold text-amber-800">Profile</span>
+                            <div id="avatar-container" class="w-24 h-24 rounded-full bg-amber-100 border-4 border-slate-800 flex items-center justify-center text-amber-900 font-bold text-xl shadow-xl overflow-hidden">
+                                ${avatarContent}
                             </div>
-                            <div class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center border-2 border-slate-900 shadow-md cursor-pointer hover:bg-amber-400 transition">
+                            <!-- Hidden File Input for Image Upload -->
+                            <input type="file" id="dp-file-input" accept="image/*" class="hidden" onchange="handleDpUpload(event)">
+                            
+                            <div onclick="document.getElementById('dp-file-input').click()" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center border-2 border-slate-900 shadow-md cursor-pointer hover:bg-amber-400 transition">
                                 <i class="fa-solid fa-camera text-xs"></i>
                             </div>
                             <span class="absolute top-1 right-2 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900"></span>
@@ -291,9 +299,6 @@
                                     <i class="fa-solid fa-lock text-xs"></i>
                                 </span>
                                 <input type="password" id="p-curr-pass" placeholder="Current password" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 pl-11 pr-10 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
-                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 cursor-pointer">
-                                    <i class="fa-solid fa-eye text-xs"></i>
-                                </span>
                             </div>
 
                             <div class="relative">
@@ -301,9 +306,6 @@
                                     <i class="fa-solid fa-lock text-xs"></i>
                                 </span>
                                 <input type="password" id="p-new-pass" placeholder="New password" class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-3 pl-11 pr-10 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
-                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 cursor-pointer">
-                                    <i class="fa-solid fa-eye text-xs"></i>
-                                </span>
                             </div>
                         </div>
 
@@ -314,6 +316,22 @@
                     </div>
                 </div>
             `;
+        }
+
+        function handleDpUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    userProfile.avatar = e.target.result;
+                    // Directly update UI preview without losing other inputs
+                    const container = document.getElementById('avatar-container');
+                    if (container) {
+                        container.innerHTML = `<img src="${userProfile.avatar}" class="w-full h-full object-cover">`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         function saveProfileChanges() {
